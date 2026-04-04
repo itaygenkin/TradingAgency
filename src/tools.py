@@ -1,4 +1,3 @@
-from csv import excel
 from typing import Any
 
 import yfinance as yf

@@ -2,7 +2,7 @@
 WATCHLIST: list[str] = ["AAPL", "TSLA", "NVDA", "AMD", "MSFT", "GOOGL"]
 
 # --- AI Model Settings ---
-MODEL_NAME: str = "gemini-1.5-flash"
+MODEL_NAME: str = "gemini-3-flash-preview"
 TEMPERATURE: float = 0.2
 
 # --- File System Settings ---

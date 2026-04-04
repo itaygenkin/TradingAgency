@@ -38,7 +38,9 @@ class MarketAnalysisAgent:
         )
 
         response = self.llm.invoke(prompt)
-        return str(response.content)
+        if response and "text" in response.content[0]:
+            return response.content[0]["text"]
+        return "Error while analyzing market data."
 
 # Test block for the agent
 if __name__ == "__main__":

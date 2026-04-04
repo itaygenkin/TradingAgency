@@ -14,8 +14,8 @@ def ensure_directories() -> None:
         os.makedirs(REPORTS_DIR)
 
 def save_report_to_file(report_content: str) -> str:
-    timestamp: str = datetime.now().strftime("%d-%m-%Y_%H:%M:%S")
-    filename: str = f"report_{timestamp}.txt"
+    timestamp: str = datetime.now().strftime("%d-%m-%Y_%H-%M")
+    filename: str = f"{REPORT_FILE_PREFIX}_{timestamp}.txt"
     file_path: str = os.path.join(REPORTS_DIR, filename)
 
     with open(file_path, "w", encoding="utf-8") as f:
@@ -39,7 +39,7 @@ def run_agent_pipeline() -> None:
     # Step 2: Passing data to the Gemini Agent
     print(f"Step 2: Sending data to Gemini for analysis...")
     analyst = MarketAnalysisAgent()
-    analyzed_report: str = analyst.analyze_market_data(raw_market_data)
+    analyzed_report = analyst.analyze_market_data(raw_market_data)
 
     # Step 3: Saving the output to a file
     print(f"Step 3: Saving report to disk...")
@@ -47,8 +47,6 @@ def run_agent_pipeline() -> None:
 
     print(f"\n--- Pipeline Completed Successfully ---")
     print(f"Report saved to: {path}")
-    print("\n--- Report Preview ---")
-    print(analyzed_report)
 
 if __name__ == "__main__":
     try:

@@ -1,0 +1,5 @@
+langchain-google-genai
+langchain-community
+yfinance
+pandas
+python-dotenv

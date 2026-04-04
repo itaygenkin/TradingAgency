@@ -1,11 +1,10 @@
 import os
 from datetime import datetime
-from src.agent import MarketAnalysisAgent
-from src.tools import get_premarket_data
+from typing import Any
 
-# --- Configuration ---
-WATCHLIST: list[str] = ["AAPL", "NVDA", "AMD", "MSFT", "GOOGL", "AKAM"]
-REPORTS_DIR: str = "data/reports"
+from src.agent import MarketAnalysisAgent
+from src.config import REPORTS_DIR, WATCHLIST, REPORT_FILE_PREFIX
+from src.tools import get_premarket_data
 
 def ensure_directories() -> None:
     """
@@ -40,21 +39,21 @@ def run_agent_pipeline() -> None:
     # Step 2: Passing data to the Gemini Agent
     print(f"Step 2: Sending data to Gemini for analysis...")
     analyst = MarketAnalysisAgent()
-    analysis_report: str = analyst.analyze_market_data(raw_market_data)
+    analyzed_report: str = analyst.analyze_market_data(raw_market_data)
 
     # Step 3: Saving the output to a file
     print(f"Step 3: Saving report to disk...")
-    path: str = save_report_to_file(analysis_report)
+    path: str = save_report_to_file(analyzed_report)
 
     print(f"\n--- Pipeline Completed Successfully ---")
     print(f"Report saved to: {path}")
     print("\n--- Report Preview ---")
-    print(analysis_report)
+    print(analyzed_report)
 
 if __name__ == "__main__":
     try:
         run_agent_pipeline()
     except Exception as e:
-        print(f"An error occured during the pipeline execution: {e}")
+        print(f"An error occurred during the pipeline execution: {e}")
 
 

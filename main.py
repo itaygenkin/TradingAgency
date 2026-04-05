@@ -2,10 +2,12 @@ import os
 from datetime import datetime
 from typing import Any
 
-from src.logger import logger
+from src.logger import get_logger
 from src.agent import MarketAnalysisAgent
 from src.config import REPORTS_DIR, WATCHLIST, REPORT_FILE_PREFIX
 from src.tools import get_premarket_data
+
+logger = get_logger("market_analyzer")
 
 def ensure_directories() -> None:
     if not os.path.exists(REPORTS_DIR):

@@ -16,8 +16,7 @@ REPORT_FILE_PREFIX: str = "market_report"
 AGENT_ROLE: str = "Expert Day-Trading Analyst"
 
 # --- Logging Settings ---
-LOGS_DIR: str = "data/logs"
-LOG_FILE: str = os.path.join(LOGS_DIR, "trading_agent.log")
+LOGS_DIR: str = "logs"
 
 # ensure logs directory exists
 if not os.path.exists(LOGS_DIR):

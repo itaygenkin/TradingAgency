@@ -1,33 +1,43 @@
 import logging
+import os
 import sys
-from src.config import LOG_FILE
+from src.config import LOGS_DIR
 
 
-def setup_logger() -> logging.Logger:
-    """
-    Configures the central logger for the application.
-    Outputs to both a file and the console.
-    """
-    logger = logging.getLogger("TradingAgent")
+class CustomFormatter(logging.Formatter):
+    """Custom formatter that removes file extensions from filenames"""
+    def format(self, record):
+        # Remove file extension from filename
+        record.filename = os.path.splitext(record.filename)[0]
+        return super().format(record)
+
+
+def get_logger(service_name: str) -> logging.Logger:
+    logger = logging.getLogger(service_name)
+
+    if logger.hasHandlers():
+        return logger
+
     logger.setLevel(logging.INFO)
 
-    # Format for our logs: Timestamp - Name - Level - Message
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    log_format: str = "[%(asctime)s] [%(levelname)s] - %(filename)s.%(funcName)s:  %(message)s"
+    date_format: str = "%Y-%m-%d %H:%M:%S"
 
-    # Handler 1: Writing to a file
-    file_handler = logging.FileHandler(LOG_FILE)
+    formatter = CustomFormatter(log_format, datefmt=date_format)
+
+    # Dynamic log file path based on service name
+    log_file_path: str = os.path.join(LOGS_DIR, f"{service_name}.log")
+
+    # File handler
+    file_handler = logging.FileHandler(log_file_path)
     file_handler.setFormatter(formatter)
 
-    # Handler 2: Printing to console (STDOUT)
+    # Console Handler
     console_handler = logging.StreamHandler(sys.stdout)
     console_handler.setFormatter(formatter)
 
-    # Add handlers to the logger
-    if not logger.handlers:
-        logger.addHandler(file_handler)
-        logger.addHandler(console_handler)
+    logger.addHandler(file_handler)
+    logger.addHandler(console_handler)
 
     return logger
-
-logger = setup_logger()
 

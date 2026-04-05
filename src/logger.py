@@ -1,6 +1,7 @@
 import logging
 import os
 import sys
+
 from src.config import LOGS_DIR
 
 
@@ -12,7 +13,7 @@ class CustomFormatter(logging.Formatter):
         return super().format(record)
 
 
-def get_logger(service_name: str) -> logging.Logger:
+def get_logger(service_name: str, log_file: str = "app.log") -> logging.Logger:
     logger = logging.getLogger(service_name)
 
     if logger.hasHandlers():
@@ -20,13 +21,13 @@ def get_logger(service_name: str) -> logging.Logger:
 
     logger.setLevel(logging.INFO)
 
-    log_format: str = "[%(asctime)s] [%(levelname)s] - %(filename)s.%(funcName)s:  %(message)s"
+    log_format: str = "[%(asctime)s] [%(name)s] [%(levelname)s] - %(filename)s.%(funcName)s:  %(message)s"
     date_format: str = "%Y-%m-%d %H:%M:%S"
 
     formatter = CustomFormatter(log_format, datefmt=date_format)
 
-    # Dynamic log file path based on service name
-    log_file_path: str = os.path.join(LOGS_DIR, f"{service_name}.log")
+    # Set the file path
+    log_file_path: str = os.path.join(LOGS_DIR, log_file)
 
     # File handler
     file_handler = logging.FileHandler(log_file_path)

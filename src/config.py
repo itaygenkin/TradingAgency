@@ -1,6 +1,6 @@
 import os
 
-WATCHLIST: list[str] = ["AAPL", "TSLA", "NVDA", "AMD", "MSFT", "GOOGL"]
+WATCHLIST: list[str] = ["AAPL", "AKAM", "NVDA", "MSFT", "GOOGL"]
 
 # --- AI Model Settings ---
 MODEL_NAME: str = "gemini-3-flash-preview"

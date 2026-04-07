@@ -1,6 +1,6 @@
 import os
 
-WATCHLIST: list[str] = ["AAPL", "AKAM", "NVDA", "MSFT", "GOOGL"]
+WATCHLIST: list[str] = ["AAPL", "AKAM", "NVDA", "GOOGL"]
 
 # --- AI Model Settings ---
 MODEL_NAME: str = "gemini-3-flash-preview"
@@ -8,7 +8,7 @@ TEMPERATURE: float = 0.2
 
 # --- File System Settings ---
 REPORTS_DIR: str = "data/reports"
-REPORT_FILE_PREFIX: str = "market_report"
+REPORT_FILE_PREFIX: str = "prediction_market_report"
 REPORT_FILE_EXTENSION: str = "md"
 
 # --- Analysis Preferences ---

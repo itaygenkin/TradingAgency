@@ -1,9 +1,10 @@
 from typing import Any
 
 from src.agent import MarketAnalysisAgent
-from src.config import VALIDATION_LOG_FILE, WATCHLIST
+from src.config import VALIDATION_LOG_FILE, WATCHLIST, VALIDATION_REPORT_PREFIX
 from src.logger import get_logger
 from src.tools import get_actual_market_performance
+from src.utils import save_report_to_file
 
 logger = get_logger("ValidationService", log_file=VALIDATION_LOG_FILE)
 
@@ -53,4 +54,8 @@ def run_validation_pipeline(morning_report_content: str) -> None:
     # step 3: output results
     logger.info("validation complete. storing results")
     # TODO: save result to a file
+    path: str = save_report_to_file(report_name=VALIDATION_REPORT_PREFIX, report_content=audit_report)
+
+    logger.info(f"report saved to: {path}")
+    logger.info(f"pipeline Completed Successfully")
 

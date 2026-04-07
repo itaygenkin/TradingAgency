@@ -15,6 +15,10 @@ REPORT_FILE_EXTENSION: str = "md"
 # This helps guide the Agent's persona without hardcoding it in the class
 AGENT_ROLE: str = "Expert Day-Trading Analyst"
 
+# --- Validation Settings ---
+VALIDATION_REPORT_PREFIX: str = "performance_validation"
+VALIDATION_LOG_FILE: str = "validation.log"
+
 # --- Logging Settings ---
 LOGS_DIR: str = "logs"
 

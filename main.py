@@ -38,7 +38,7 @@ def run_agent_pipeline() -> None:
     market_prices: dict[str, Any] = get_premarket_data(WATCHLIST)
 
     # Step 2: Passing data to the Gemini Agent
-    logger.info(f"step 2: sending data to Gemini for analysis...")
+    logger.info(f"step 2: sending data to Gemini for analysis")
     news_context: dict[str, str] = {}
     for ticker in WATCHLIST:
         news_context[ticker] = get_stock_news(ticker)

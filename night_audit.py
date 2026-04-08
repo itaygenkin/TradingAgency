@@ -1,6 +1,6 @@
 from src.logger import get_logger
 from src.audit_service import PerformanceValidator
-from src.market_provider import get_actual_market_performance
+from src.market_provider import MarketProvider
 from src.repository import MarketRepository
 
 logger = get_logger("ValidationMain")
@@ -19,7 +19,7 @@ def run_night_audit():
 
     # data extraction
     tickers = [prediction["ticker"] for prediction in pending_predictions]
-    actual_market_data = get_actual_market_performance(tickers)
+    actual_market_data = MarketProvider.get_actual_market_performance(tickers)
 
     for prediction in pending_predictions:
         ticker = prediction["ticker"]

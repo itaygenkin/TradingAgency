@@ -3,7 +3,7 @@ from typing import Any
 from src.logger import get_logger
 from src.llm_engine import MarketAnalysisAgent
 from src.config import WATCHLIST, REPORT_FILE_PREFIX
-from src.market_provider import get_premarket_data, get_stock_news_for_watchlist
+from src.market_provider import MarketProvider
 from src.repository import MarketRepository
 from src.utils import ensure_directories, save_report_to_file
 
@@ -18,8 +18,8 @@ def run_day_analysis() -> None:
     agent = MarketAnalysisAgent()
 
     logger.info(f"step 1: fetching pre-market data and stock news for {len(WATCHLIST)} stocks")
-    market_data: dict[str, Any] = get_premarket_data(WATCHLIST)
-    news_data: dict[str, Any] = get_stock_news_for_watchlist(WATCHLIST)
+    market_data: dict[str, Any] = MarketProvider.get_premarket_data(WATCHLIST)
+    news_data: dict[str, Any] = MarketProvider.get_stock_news_for_watchlist(WATCHLIST)
 
     logger.info(f"step 2: sending data to agent for analysis and creating report")
     report = agent.analyze_market_data(market_data, news_data)

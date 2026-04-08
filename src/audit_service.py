@@ -3,7 +3,7 @@ from typing import Any
 from src.llm_engine import MarketAnalysisAgent
 from src.config import VALIDATION_LOG_FILE, WATCHLIST, VALIDATION_REPORT_PREFIX
 from src.logger import get_logger
-from src.market_provider import get_actual_market_performance
+from src.market_provider import MarketProvider
 from src.utils import save_report_to_file
 
 logger = get_logger("ValidationService", log_file=VALIDATION_LOG_FILE)
@@ -45,7 +45,7 @@ def run_validation_pipeline(morning_report_content: str) -> None:
     logger.info("initializing validation pipeline")
 
     # step 1: fetch actual data using GET/yfinance
-    actual_stats = get_actual_market_performance(WATCHLIST)
+    actual_stats = MarketProvider.get_actual_market_performance(WATCHLIST)
 
     # step 2: run AI analysis
     validator = PerformanceValidator()

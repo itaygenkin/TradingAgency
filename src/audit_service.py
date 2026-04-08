@@ -1,10 +1,9 @@
 from typing import Any
 
 from src.llm_engine import MarketAnalysisAgent
-from src.config import VALIDATION_LOG_FILE, WATCHLIST, VALIDATION_REPORT_PREFIX
+from src.config import VALIDATION_LOG_FILE
 from src.logger import get_logger
-from src.market_provider import MarketProvider
-from src.utils import save_report_to_file
+
 
 logger = get_logger("ValidationService", log_file=VALIDATION_LOG_FILE)
 
@@ -13,48 +12,42 @@ class PerformanceValidator:
     def __init__(self):
         self.agent = MarketAnalysisAgent()
 
-    def validate_predictions(self, pre_market_summary: str, actual_data: dict[str, Any]) -> str:
+    def evaluate(self, prediction_row: dict[str, Any], actual_data: dict[str, Any]) -> tuple[bool, int]:
         """
-        Hybrid approach: Use AI to compare the morning's report with evening's reality.
+        compares morning predictions with evening reality using the LLM
+        :param prediction_row: dictionary containing ticker, predicted_move, etc.
+        :param actual_data: dictionary containing open, close, and actual_change_pct.
+        :return: a tuple of (is_correct: bool, score: int).
         """
-        logger.info("starting hybrid validation analysis")
+        ticker = prediction_row.get("ticker")
+        logger.info(f"evaluating performance for {ticker}")
 
-        prompt: str = (
-            f"You are an Expert Trading Auditor. Below is the Pre-Market Report you wrote earlier today:\n"
-            f"--- MORNING REPORT ---\n{pre_market_summary}\n\n"
-            f"And here is what actually happened in the market (Open vs Close): {actual_data}\n\n"
-            f"Task:\n"
-            f"1. Compare your predictions to actual results.\n"
-            f"2. Identify where you were accurate and where you missed the mark.\n"
-            f"3. Provide a 'Confidence Score' (0-100) for today's analysis.\n"
-            f"4. Suggest one improvement for tomorrow's pre-market logic.\n"
-            f"Keep it brief and professional."
+        prompt = (
+            f"Review the following trading prediction for {ticker}:\n"
+            f"- Predicted Move: {prediction_row.get("predicted_move")}\n"
+            f"- Actual Market Open Price: ${actual_data.get("open")}\n"
+            f"- Actual Price Change during session: {actual_data.get("actual_change_pct")}%\n\n"
+            f"Criteria:\n"
+            f"1. Was the direction (Bullish/Bearish/Neutral) correct based on the actual move?\n"
+            f"2. Provide a confidence score between 0 and 100 based on accuracy.\n\n"
+            f"Return only a comma-separated string in this format: [True/False], [Score]\n"
+            f"Example: True, 85"
         )
 
-        response = self.agent.llm.invoke(prompt)
-        if response and "text" in response.content[0]:
-            return response.content[0]["text"]
+        try:
+            response = self.agent.llm.invoke(prompt)
+            result_text = str(response.content).strip()
 
-        return "Error while analyzing performance data."
+            # parsing the llm response
+            parts = result_text.split(",")
+            is_correct = parts[0].strip().lower() == "true"
+            score = int(parts[1].strip())
 
+            logger.info(f"audit result for {ticker}: Correct: {is_correct}, Score: {score}")
+            return is_correct, score
+        except Exception as e:
+            logger.error(f"failed to evaluate performance for {ticker}: {e}")
+            # default fallback in case of llm error
+            return False, 0
 
-def run_validation_pipeline(morning_report_content: str) -> None:
-    """
-    main entry point for the validation service.
-    """
-    logger.info("initializing validation pipeline")
-
-    # step 1: fetch actual data using GET/yfinance
-    actual_stats = MarketProvider.get_actual_market_performance(WATCHLIST)
-
-    # step 2: run AI analysis
-    validator = PerformanceValidator()
-    audit_report = validator.validate_predictions(morning_report_content, actual_stats)
-
-    # step 3: output results
-    logger.info("validation complete. storing results")
-    path: str = save_report_to_file(report_name=VALIDATION_REPORT_PREFIX, report_content=audit_report)
-
-    logger.info(f"report saved to: {path}")
-    logger.info(f"pipeline Completed Successfully")
 

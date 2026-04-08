@@ -1,6 +1,7 @@
 from typing import Any
 
 import psycopg2
+from psycopg2.extras import RealDictCursor
 
 from src.config import DB_CONFIG
 from src.logger import get_logger
@@ -87,28 +88,23 @@ class MarketRepository:
         except psycopg2.Error as e:
             logger.error(f"failed to update evening validation for ticker: '{ticker}'. {e}")
 
-    def get_pending_predictions(self) -> list[tuple[Any]]:
+    def get_pending_predictions(self) -> list[dict[str, Any]]:
         query = """
-        SELECT id, ticker, pre_market_price, prev_close_price, predicted_move
+        SELECT ticker, pre_market_price, prev_close_price, predicted_move
         FROM predictions
         WHERE trade_date = CURRENT_DATE AND status = 'PENDING';
         """
         try:
             with self._get_connection() as conn:
-                with conn.cursor() as cur:
-                    cur.execute(query)
-                    return cur.fetchall()  # TODO: edit return to be a list of dictionaries
+                with conn.cursor(cursor_factory=RealDictCursor) as rd_cur:
+                    rd_cur.execute(query)
+                    results = rd_cur.fetchall()
+
+                    # convert RealDictRow objects to standard dictionaries for cleaner precessing
+                    predictions = [dict(row) for row in results]
+
+                    logger.info(f"retrieved {len(predictions)} pending predictions for audit")
+                    return predictions
         except psycopg2.Error as e:
             logger.error(f"failed to get pending predictions. {e}")
             return []
-
-
-
-
-
-
-
-
-
-
-

@@ -1,9 +1,9 @@
 from typing import Any
 
-from src.agent import MarketAnalysisAgent
+from src.llm_engine import MarketAnalysisAgent
 from src.config import VALIDATION_LOG_FILE, WATCHLIST, VALIDATION_REPORT_PREFIX
 from src.logger import get_logger
-from src.tools import get_actual_market_performance
+from src.market_provider import get_actual_market_performance
 from src.utils import save_report_to_file
 
 logger = get_logger("ValidationService", log_file=VALIDATION_LOG_FILE)
@@ -26,7 +26,7 @@ class PerformanceValidator:
             f"Task:\n"
             f"1. Compare your predictions to actual results.\n"
             f"2. Identify where you were accurate and where you missed the mark.\n"
-            f"3. Provide a 'Confidence Score (0-100) for today's analysis.\n"
+            f"3. Provide a 'Confidence Score' (0-100) for today's analysis.\n"
             f"4. Suggest one improvement for tomorrow's pre-market logic.\n"
             f"Keep it brief and professional."
         )
@@ -53,7 +53,6 @@ def run_validation_pipeline(morning_report_content: str) -> None:
 
     # step 3: output results
     logger.info("validation complete. storing results")
-    # TODO: save result to a file
     path: str = save_report_to_file(report_name=VALIDATION_REPORT_PREFIX, report_content=audit_report)
 
     logger.info(f"report saved to: {path}")

@@ -28,6 +28,7 @@ class MarketAnalysisAgent:
         """
         Synthesizes price data and news into a professional trading report.
         :param market_data: the dictionary returned by get_premarket_data.
+        :param news_data: the dictionary returned by get_news_data.
         :return: a string containing the AI's analysis and recommendation.
         """
         logger.info("Starting AI synthesis of market data and news.")
@@ -50,13 +51,4 @@ class MarketAnalysisAgent:
             return response.content[0]["text"]
 
         return "Error while analyzing market data."
-
-# Test block for the agent
-if __name__ == "__main__":
-    # Mock data for testing
-    sample_data: dict[str, Any] = {
-        "AAPL": {"price": 185.2, "change_pct": 1.5, "volume": 500000}
-    }
-    analyst = MarketAnalysisAgent()
-    print(analyst.analyze_market_data(sample_data))
 

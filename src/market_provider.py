@@ -1,3 +1,4 @@
+import time
 from typing import Any
 
 import yfinance as yf
@@ -9,6 +10,7 @@ from src.logger import get_logger
 logger = get_logger("market_tools")
 search_tool = DuckDuckGoSearchRun()
 
+# TODO: create a class for of those?
 
 def get_premarket_data(tickers: list[str]) -> dict[str, Any]:
     """
@@ -17,7 +19,7 @@ def get_premarket_data(tickers: list[str]) -> dict[str, Any]:
     :return: a dictionary containing price, change percentage, and volume for each ticker.
     """
     results: dict[str, Any] = {}
-    logger.info(f"Fetching market data for {len(tickers)} stocks.")
+    logger.info(f"fetching market data for {len(tickers)} stocks.")
 
     for ticker in tickers:
         try:
@@ -38,17 +40,19 @@ def get_premarket_data(tickers: list[str]) -> dict[str, Any]:
                 }
             else:
                 logger.warning(f"No data for {ticker}")
+                results[ticker] = {"status": "failure"}
 
         except Exception as e:
-            logger.error(f"Error fetching data for {ticker}: {str(e)}")
+            logger.error(f"error fetching data for {ticker}: {str(e)}")
+            results[ticker] = {"status": "failure"}
 
     return results
 
-def get_stock_news(ticker: str) -> str:
+def _get_stock_news(ticker: str) -> str:
     """
     searches for the most recent news for a specific ticker.
     """
-    logger.info(f"Searching web for {ticker} news...")
+    logger.info(f"searching web for {ticker} news")
     query: str = f"latest {ticker} stock market news and catalysts"
 
     try:
@@ -58,6 +62,15 @@ def get_stock_news(ticker: str) -> str:
     except Exception as e:
         logger.error(f"search failed for {ticker}: {str(e)}")
         return "No recent news found."
+
+
+def get_stock_news_for_watchlist(tickers: list[str]) -> dict[str, str]:
+    results: dict[str, str] = {}
+    for ticker in tickers:
+        results[ticker] = _get_stock_news(ticker)
+        time.sleep(0.3)  # to avoid hitting search rate limits
+
+    return results
 
 
 def get_actual_market_performance(tickers: list[str]) -> dict[str, Any]:

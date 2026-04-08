@@ -25,3 +25,12 @@ LOGS_DIR: str = "logs"
 # ensure logs directory exists
 if not os.path.exists(LOGS_DIR):
     os.makedirs(LOGS_DIR)
+
+# --- Database Settings ---
+DB_CONFIG = {
+    "host": os.getenv("DB_HOST", "localhost"),
+    "database": os.getenv("DB_NAME", "trading_db"),
+    "user": os.getenv("DB_USER", "trading_user"),
+    "password": os.getenv("DB_PASS", ""),
+    "port": os.getenv("DB_PORT", "5432"),
+}

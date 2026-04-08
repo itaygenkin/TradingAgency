@@ -21,14 +21,16 @@ def run_day_analysis() -> None:
     market_data: dict[str, Any] = MarketProvider.get_premarket_data(WATCHLIST)
     news_data: dict[str, Any] = MarketProvider.get_stock_news_for_watchlist(WATCHLIST)
 
-    logger.info(f"step 2: sending data to agent for analysis and creating report")
+    logger.info("step 2: sending data to agent for analysis and creating report")
     report = agent.analyze_market_data(market_data, news_data)
-    predictions_dict = agent.extract_predictions(report)
 
-    logger.info(f"step 3: saving report to file")
+    logger.info("step 3: saving report to file")
     report_path: str = save_report_to_file(report_name=REPORT_FILE_PREFIX, report_content=report)
 
-    logger.info(f"step 4: inserting report into database")
+    logger.info("step 4: extracting predictions from report")
+    predictions_dict = agent.extract_predictions(report)
+
+    logger.info("step 5: inserting report into database")
     for ticker in WATCHLIST:
         market_data[ticker]["pred_move"] = predictions_dict.get(ticker, "Neutral")
         db.insert_morning_prediction(

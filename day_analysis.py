@@ -23,14 +23,14 @@ def run_day_analysis() -> None:
 
     logger.info(f"step 2: sending data to agent for analysis and creating report")
     report = agent.analyze_market_data(market_data, news_data)
+    predictions_dict = agent.extract_predictions(report)
 
     logger.info(f"step 3: saving report to file")
     report_path: str = save_report_to_file(report_name=REPORT_FILE_PREFIX, report_content=report)
 
     logger.info(f"step 4: inserting report into database")
     for ticker in WATCHLIST:
-        pred_move = "Neutral"  # TODO: extract real value from report content
-        market_data[ticker]["pred_move"] = pred_move
+        market_data[ticker]["pred_move"] = predictions_dict.get(ticker, "Neutral")
         db.insert_morning_prediction(
             ticker=ticker,
             data=market_data[ticker],

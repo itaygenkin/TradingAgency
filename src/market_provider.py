@@ -75,9 +75,9 @@ class MarketProvider:
         return results
 
     @staticmethod
-    def get_actual_market_performance(tickers: list[str]) -> dict[str, Any]:
+    def get_actual_market_performance(tickers: list[str]) -> dict[str, dict[str, float]]:
         logger.info(f"fetching actual market performance for {len(tickers)} stocks")
-        actual_results: dict[str, Any] = {}
+        actual_results: dict[str, dict[str, float | None]] = {}
         for ticker in tickers:
             try:
                 stock = yf.Ticker(ticker)

@@ -1,5 +1,9 @@
 import os
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 WATCHLIST: list[str] = ["AAPL", "AKAM", "NVDA", "GOOGL"]
 
 # --- AI Model Settings ---
@@ -7,7 +11,7 @@ MODEL_NAME: str = "gemini-3-flash-preview"
 TEMPERATURE: float = 0.2
 
 # --- File System Settings ---
-REPORTS_DIR: str = "data/reports"
+REPORTS_DIR: str = "./data/reports"
 REPORT_FILE_PREFIX: str = "prediction_market_report"
 REPORT_FILE_EXTENSION: str = "md"
 
@@ -20,7 +24,7 @@ VALIDATION_REPORT_PREFIX: str = "performance_validation"
 VALIDATION_LOG_FILE: str = "validation.log"
 
 # --- Logging Settings ---
-LOGS_DIR: str = "logs"
+LOGS_DIR: str = "./logs"
 
 # ensure logs directory exists
 if not os.path.exists(LOGS_DIR):
@@ -30,7 +34,7 @@ if not os.path.exists(LOGS_DIR):
 DB_CONFIG = {
     "host": os.getenv("DB_HOST", "localhost"),
     "database": os.getenv("DB_NAME", "trading_db"),
-    "user": os.getenv("DB_USER", "trading_user"),
-    "password": os.getenv("DB_PASS", ""),
+    "user": os.getenv("DB_USER", "postgres"),
+    "password": os.getenv("DB_PASSWORD", ""),
     "port": os.getenv("DB_PORT", "5432"),
 }

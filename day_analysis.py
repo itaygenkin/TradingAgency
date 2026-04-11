@@ -1,5 +1,6 @@
 from typing import Any
 
+from src.exceptions import MarketDataError
 from src.logger import get_logger
 from src.llm_engine import MarketAnalysisAgent
 from src.config import WATCHLIST, REPORT_FILE_PREFIX
@@ -20,34 +21,34 @@ def run_day_analysis() -> None:
     agent = MarketAnalysisAgent()
 
     logger.info(f"step 1: fetching pre-market data and stock news for {len(WATCHLIST)} stocks")
-    market_data: dict[str, Any] = MarketProvider.get_premarket_data(WATCHLIST)
-    news_data: dict[str, Any] = MarketProvider.get_stock_news_for_watchlist(WATCHLIST)
+    try:
+        market_data: dict[str, Any] = MarketProvider.get_premarket_data(WATCHLIST)
+        news_data: dict[str, Any] = MarketProvider.get_stock_news_for_watchlist(WATCHLIST)
 
-    logger.info("step 2: sending data to agent for analysis and creating report")
-    report = agent.analyze_market_data(market_data, news_data)
+        logger.info("step 2: sending data to agent for analysis and creating report")
+        report = agent.analyze_market_data(market_data, news_data)
 
-    logger.info("step 3: saving report to file")
-    report_path: str = save_report_to_file(report_name=REPORT_FILE_PREFIX, report_content=report)
+        logger.info("step 3: saving report to file")
+        report_path: str = save_report_to_file(report_name=REPORT_FILE_PREFIX, report_content=report)
 
-    logger.info("step 4: extracting predictions from report")
-    predictions_dict = agent.extract_predictions(report)
+        logger.info("step 4: extracting predictions from report")
+        predictions_dict = agent.extract_predictions(report)
 
-    logger.info("step 5: inserting report into database")
-    for ticker in WATCHLIST:
-        market_data[ticker]["pred_move"] = predictions_dict.get(ticker, "Neutral")
-        db.insert_morning_prediction(
-            ticker=ticker,
-            data=market_data[ticker],
-            report_path=report_path
-        )
+        logger.info("step 5: inserting report into database")
+        for ticker in WATCHLIST:
+            market_data[ticker]["pred_move"] = predictions_dict.get(ticker, "Neutral")
+            db.insert_morning_prediction(
+                ticker=ticker,
+                data=market_data[ticker],
+                report_path=report_path
+            )
 
-    logger.info("day analysis completed and saved to DB")
+    except MarketDataError as mde:
+        logger.error(f"{mde}")
+    else:
+        logger.info("day analysis completed")
 
 
 if __name__ == "__main__":
-    try:
-        run_day_analysis()
-    except Exception as e:
-        logger.error(f"an error occurred during the pipeline execution: {str(e)}", exc_info=True)
-
+    run_day_analysis()
 

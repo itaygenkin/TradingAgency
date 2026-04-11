@@ -6,6 +6,7 @@ import yfinance as yf
 import pandas as pd
 from langchain_community.tools import DuckDuckGoSearchRun
 
+from src.exceptions import MarketDataError
 from src.logger import get_logger
 
 logger = get_logger("market_tools")
@@ -29,27 +30,32 @@ class MarketProvider:
                 stock = yf.Ticker(ticker)
                 df: pd.DataFrame = stock.history(period="1d", interval="1m", prepost=True)
 
-                if not df.empty:
-                    last_price: float = float(df["Close"].iloc[-1])
-                    prev_close: float = stock.info.get("previousClose", last_price)
-                    change_pct: float = ((last_price - prev_close) / prev_close) * 100
-
-                    results[ticker] = {
-                        "status": "success",
-                        "price": round(last_price, 2),
-                        "change_pct": round(change_pct, 2),
-                        "volume": int(df["Volume"].iloc[-1]),
-                        "timestamp": str(df.index[-1])
-                    }
-                else:
-                    logger.warning(f"No data for {ticker}")
+                if df.empty:
+                    logger.warning(f"No data for {ticker}. Skipping.")
                     results[ticker] = {"status": "failure"}
+                    continue
+
+                last_price: float = float(df["Close"].iloc[-1])
+                prev_close: float = stock.info.get("previousClose", last_price)
+                change_pct: float = ((last_price - prev_close) / prev_close) * 100
+
+                results[ticker] = {
+                    "status": "success",
+                    "price": round(last_price, 2),
+                    "change_pct": round(change_pct, 2),
+                    "volume": int(df["Volume"].iloc[-1]),
+                    "timestamp": str(df.index[-1])
+                }
 
             except Exception as e:
                 logger.error(f"error fetching data for {ticker}: {str(e)}")
                 results[ticker] = {"status": "failure"}
 
+        if not results:
+            raise MarketDataError("No market data could be fetched for any ticker")
+
         return results
+
     @staticmethod
     def _get_stock_news(ticker: str) -> str:
         """

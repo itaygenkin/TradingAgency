@@ -1,6 +1,7 @@
+import sys
 from typing import Any
 
-from src.exceptions import MarketDataError
+from src.exceptions import MarketDataError, DatabaseConnectionError
 from src.logger import get_logger
 from src.llm_engine import MarketAnalysisAgent
 from src.config import WATCHLIST, REPORT_FILE_PREFIX
@@ -17,11 +18,11 @@ def run_day_analysis() -> None:
     if not MarketProvider.is_market_open_today():
         return
 
-    db = MarketRepository()
-    agent = MarketAnalysisAgent()
-
-    logger.info(f"step 1: fetching pre-market data and stock news for {len(WATCHLIST)} stocks")
     try:
+        db = MarketRepository()
+        agent = MarketAnalysisAgent()
+
+        logger.info(f"step 1: fetching pre-market data and stock news for {len(WATCHLIST)} stocks")
         market_data: dict[str, Any] = MarketProvider.get_premarket_data(WATCHLIST)
         news_data: dict[str, Any] = MarketProvider.get_stock_news_for_watchlist(WATCHLIST)
 
@@ -42,9 +43,15 @@ def run_day_analysis() -> None:
                 data=market_data[ticker],
                 report_path=report_path
             )
-
-    except MarketDataError as mde:
-        logger.error(f"{mde}")
+    except DatabaseConnectionError as e:
+        logger.error(f"DATABASE CONNECTION ERROR: {e}")
+        sys.exit(1)
+    except MarketDataError as e:
+        logger.error(f"DATA ERROR: {e}")
+        sys.exit(1)
+    except Exception as e:
+        logger.error(f"UNEXPECTED EXCEPTION: {e}")
+        sys.exit(1)
     else:
         logger.info("day analysis completed")
 

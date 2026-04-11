@@ -5,7 +5,7 @@ class TradingAgentError(Exception):
 
 class DatabaseConnectionError(TradingAgentError):
     """raised when we cannot connect to the database."""
-
+    pass
     
 class MarketDataError(TradingAgentError):
     """raised when critical market data is missing."""

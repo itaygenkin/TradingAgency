@@ -13,6 +13,8 @@ logger = get_logger("day_analysis")
 def run_day_analysis() -> None:
     logger.info("starting day analysis pipeline")
     ensure_directories()
+    if not MarketProvider.is_market_open_today():
+        return
 
     db = MarketRepository()
     agent = MarketAnalysisAgent()

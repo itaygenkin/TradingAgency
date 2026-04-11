@@ -1,3 +1,4 @@
+from datetime import datetime
 import time
 from typing import Any
 
@@ -101,8 +102,18 @@ class MarketProvider:
                         "actual_change_pct": None,
                     }
                     logger.warning(f"no intraday data for {ticker} validation")
+
             except Exception as e:
                 logger.error(f"error validating performance for {ticker}: {str(e)}")
 
         return actual_results
+
+    @staticmethod
+    def is_market_open_today() -> bool:
+        today = datetime.today()
+        if today.weekday() >= 5:  # Saturday and Sunday
+            logger.info("today is weekend. market is closed.")
+            return False
+        # TODO: handle holidays
+        return True
 

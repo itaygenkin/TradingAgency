@@ -5,8 +5,10 @@ from src.repository import MarketRepository
 
 logger = get_logger("ValidationMain")
 
-def run_night_audit():
+def run_night_audit() -> None:
     logger.info("starting Night Audit pipeline")
+    if not MarketProvider.is_market_open_today():
+        return
     db = MarketRepository()
     validator = PerformanceValidator()
 

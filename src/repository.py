@@ -71,27 +71,6 @@ class MarketRepository:
         print()
         self._bulk_insert_morning_predictions(predictions_list)
 
-    # def insert_morning_prediction(self, ticker: str, data: dict[str, Any], report_path: str) -> None:
-    #     query = f"""
-    #         INSERT INTO {self._table_name} (
-    #             ticker, trade_date, prev_close_price, pre_market_price, predicted_move, ai_report_path, created_at, status)
-    #         VALUES (%s, CURRENT_DATE, %s, %s, %s, %s, date_trunc('minute', CURRENT_TIMESTAMP), 'PENDING');
-    #     """
-    #     try:
-    #         with self._get_connection() as conn:
-    #             with conn.cursor() as cur:
-    #                 cur.execute(query, (
-    #                     ticker,
-    #                     data.get("prev_close_price"),
-    #                     data.get("pre_market_price"),
-    #                     data.get("predicted_move", "Neutral"),
-    #                     report_path
-    #                 ))
-    #                 conn.commit()
-    #         logger.info(f"morning data for ticker: '{ticker}' saved to DB")
-    #     except psycopg2.Error as e:
-    #         logger.error(f"failed to insert morning data for ticker: '{ticker}'. {e}")
-
     def bulk_update_evening_validation(self, update_data_list: list) -> None:
         query = f"""
             UPDATE {self._table_name}
@@ -112,31 +91,6 @@ class MarketRepository:
         except psycopg2.Error as e:
             logger.error(f"failed to update {len(update_data_list)} audit records. {e}")
             raise
-
-    def update_evening_validation(self, ticker: str, actual_data: dict[str, Any], is_correct: bool, score: int) -> None:
-        query = f"""
-            UPDATE {self._table_name}
-            SET actual_open_price = %s,
-                actual_move_pct = %s,
-                is_correct = %s,
-                confidence_score = %s,
-                status = 'COMPLETED'
-            WHERE ticker = %s AND trade_date = CURRENT_DATE;
-        """
-        try:
-            with self._get_connection() as conn:
-                with conn.cursor() as cur:
-                    cur.execute(query, (
-                        actual_data.get("open_price"),
-                        actual_data.get("actual_move_pct"),
-                        is_correct,
-                        score,
-                        ticker
-                    ))
-                    conn.commit()
-            logger.info(f"evening validation for ticker: '{ticker}' updated in DB")
-        except psycopg2.Error as e:
-            logger.error(f"failed to update evening validation for ticker: '{ticker}'. {e}")
 
     def get_pending_predictions(self) -> list[dict[str, Any]]:
         query = f"""

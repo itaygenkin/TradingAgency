@@ -68,7 +68,8 @@ class MarketAnalysisAgent:
 
         return "Error while analyzing market data."
 
-    def extract_predictions(self, full_report: str) -> dict[str, str]:
+    @staticmethod
+    def extract_predictions(full_report: str) -> dict[str, str]:
         predictions: dict[str, str] = {}
         pattern = r"DATA_START\n(.*?)\nDATA_END"
         match = re.search(pattern, full_report, re.DOTALL)

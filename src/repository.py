@@ -10,14 +10,15 @@ logger = get_logger(__name__)
 
 class MarketRepository:
     def __init__(self):
+        self._table_name: str = "market"
         self._create_table()
 
     def _get_connection(self):
         return psycopg2.connect(**DB_CONFIG)
 
     def _create_table(self):
-        query = """
-        CREATE TABLE IF NOT EXISTS market (
+        query = f"""
+        CREATE TABLE IF NOT EXISTS {self._table_name} (
             id                  SERIAL      PRIMARY KEY,
             ticker              VARCHAR(10) NOT NULL,
             trade_date          DATE    DEFAULT CURRENT_DATE,
@@ -38,13 +39,13 @@ class MarketRepository:
                 with conn.cursor() as cursor:
                     cursor.execute(query)
                     conn.commit()
-            logger.info("database table 'prediction' created")
+            logger.info(f"database table '{self._table_name}' created")
         except psycopg2.Error as e:
             logger.error("failed to create table", e)
 
     def insert_morning_prediction(self, ticker: str, data: dict[str, Any], report_path: str) -> None:
-        query = """
-            INSERT INTO predictions (
+        query = f"""
+            INSERT INTO {self._table_name} (
                 ticker, trade_date, prev_close_price, pre_market_price, predicted_move, ai_report_path, created_at, status) 
             VALUES (%s, CURRENT_DATE, %s, %s, %s, %s, CURRENT_TIMESTAMP, 'PENDING');
         """
@@ -64,8 +65,8 @@ class MarketRepository:
             logger.error(f"failed to insert morning data for ticker: '{ticker}'. {e}")
 
     def update_evening_validation(self, ticker: str, actual_data: dict[str, Any], is_correct: bool, score: int) -> None:
-        query = """
-            UPDATE predictions
+        query = f"""
+            UPDATE {self._table_name}
             SET actual_open_price = %s,
                 actual_move_pct = %s,
                 is_correct = %s,
@@ -89,9 +90,9 @@ class MarketRepository:
             logger.error(f"failed to update evening validation for ticker: '{ticker}'. {e}")
 
     def get_pending_predictions(self) -> list[dict[str, Any]]:
-        query = """
+        query = f"""
         SELECT ticker, pre_market_price, prev_close_price, predicted_move
-        FROM predictions
+        FROM {self._table_name}
         WHERE trade_date = CURRENT_DATE AND status = 'PENDING';
         """
         try:

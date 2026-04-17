@@ -1,7 +1,7 @@
 from typing import Any
 
 import psycopg2
-from psycopg2.extras import RealDictCursor
+from psycopg2.extras import RealDictCursor, execute_batch
 
 from src.config import DB_CONFIG
 from src.logger import get_logger
@@ -24,13 +24,13 @@ class MarketRepository:
             trade_date          DATE    DEFAULT CURRENT_DATE,
             prev_close_price    DECIMAL(10, 2),
             pre_market_price    DECIMAL(10, 2),
-            predicted_move      VARCHAR(20), -- Bullish/Bearish/Neutral
+            predicted_move      VARCHAR(20) DEFAULT 'Neutral', -- Bullish/Bearish/Neutral
             actual_open_price   DECIMAL(10, 2),
             actual_move_pct     DECIMAL(10, 2),
             is_correct          BOOLEAN,
             confidence_score    INTEGER,
             ai_report_path      TEXT,
-            created_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            created_at          TIMESTAMP(0) NOT NULL DEFAULT date_trunc('minute', CURRENT_TIMESTAMP),
             status              VARCHAR(20) NOT NULL DEFAULT 'PENDING'
         );
         """
@@ -43,26 +43,75 @@ class MarketRepository:
         except psycopg2.Error as e:
             logger.error("failed to create table", e)
 
-    def insert_morning_prediction(self, ticker: str, data: dict[str, Any], report_path: str) -> None:
+    def _bulk_insert_morning_predictions(self, prediction_list: list) -> None:
         query = f"""
             INSERT INTO {self._table_name} (
-                ticker, trade_date, prev_close_price, pre_market_price, predicted_move, ai_report_path, created_at, status) 
-            VALUES (%s, CURRENT_DATE, %s, %s, %s, %s, CURRENT_TIMESTAMP, 'PENDING');
+            ticker, prev_close_price, pre_market_price, predicted_move, ai_report_path, status)
+            VALUES (%s, %s, %s, %s, %s, 'PENDING')
         """
         try:
             with self._get_connection() as conn:
                 with conn.cursor() as cur:
-                    cur.execute(query, (
-                        ticker,
-                        data.get("prev_close_price"),
-                        data.get("pre_market_price"),
-                        data.get("predicted_move", "Neutral"),
-                        report_path
-                    ))
+                    cur.executemany(query, prediction_list)
                     conn.commit()
-            logger.info(f"morning data for ticker: '{ticker}' saved to DB")
+            logger.info(f"bulk insert morning predictions for tickers: {(prediction.next() for prediction in prediction_list)}")
         except psycopg2.Error as e:
-            logger.error(f"failed to insert morning data for ticker: '{ticker}'. {e}")
+            logger.error(f"failed to bulk insert morning predictions. {e}")
+
+    def bulk_insert_morning_predictions(self, predictions: dict[str, dict[str, float | str]], report_path: str) -> None:
+        predictions_list: list[tuple] = [
+            (ticker,
+             predictions[ticker].get("prev_close_price"),
+             predictions[ticker].get("pre_market_price"),
+             predictions[ticker].get("predicted_move", "Neutral"),
+             report_path) for ticker in predictions
+        ]
+        print()
+        print(predictions_list)
+        print()
+        self._bulk_insert_morning_predictions(predictions_list)
+
+    # def insert_morning_prediction(self, ticker: str, data: dict[str, Any], report_path: str) -> None:
+    #     query = f"""
+    #         INSERT INTO {self._table_name} (
+    #             ticker, trade_date, prev_close_price, pre_market_price, predicted_move, ai_report_path, created_at, status)
+    #         VALUES (%s, CURRENT_DATE, %s, %s, %s, %s, date_trunc('minute', CURRENT_TIMESTAMP), 'PENDING');
+    #     """
+    #     try:
+    #         with self._get_connection() as conn:
+    #             with conn.cursor() as cur:
+    #                 cur.execute(query, (
+    #                     ticker,
+    #                     data.get("prev_close_price"),
+    #                     data.get("pre_market_price"),
+    #                     data.get("predicted_move", "Neutral"),
+    #                     report_path
+    #                 ))
+    #                 conn.commit()
+    #         logger.info(f"morning data for ticker: '{ticker}' saved to DB")
+    #     except psycopg2.Error as e:
+    #         logger.error(f"failed to insert morning data for ticker: '{ticker}'. {e}")
+
+    def bulk_update_evening_validation(self, update_data_list: list) -> None:
+        query = f"""
+            UPDATE {self._table_name}
+            SET actual_open_price = %s,
+                actual_move_pct = %s,
+                is_correct = %s,
+                confidence_score = %s,
+                status = 'COMPLETED'
+            WHERE ticker = %s AND trade_date = CURRENT_DATE;
+        """
+        try:
+            with self._get_connection() as conn:
+                with conn.cursor() as cur:
+                    execute_batch(cur, query, update_data_list)
+                    conn.commit()
+
+            logger.info(f"successfully update {len(update_data_list)} audit records")
+        except psycopg2.Error as e:
+            logger.error(f"failed to update {len(update_data_list)} audit records. {e}")
+            raise
 
     def update_evening_validation(self, ticker: str, actual_data: dict[str, Any], is_correct: bool, score: int) -> None:
         query = f"""

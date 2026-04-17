@@ -38,11 +38,9 @@ def run_day_analysis() -> None:
         logger.info("step 5: inserting report into database")
         for ticker in WATCHLIST:
             market_data[ticker]["pred_move"] = predictions_dict.get(ticker, "Neutral")
-            db.insert_morning_prediction(
-                ticker=ticker,
-                data=market_data[ticker],
-                report_path=report_path
-            )
+
+        db.bulk_insert_morning_predictions(market_data, report_path)
+
     except DatabaseConnectionError as e:
         logger.error(f"DATABASE CONNECTION ERROR: {e}")
         sys.exit(1)

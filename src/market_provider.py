@@ -41,9 +41,9 @@ class MarketProvider:
 
                 results[ticker] = {
                     "status": "success",
+                    "prev_close": round(last_price, 2),
                     "price": round(last_price, 2),
                     "change_pct": round(change_pct, 2),
-                    "volume": int(df["Volume"].iloc[-1]),
                     "timestamp": str(df.index[-1])
                 }
 
@@ -82,7 +82,7 @@ class MarketProvider:
         return results
 
     @staticmethod
-    def get_actual_market_performance(tickers: list[str]) -> dict[str, dict[str, float]]:
+    def get_actual_market_performance(tickers: list[str]) -> dict[str, dict[str, float | None]]:
         logger.info(f"fetching actual market performance for {len(tickers)} stocks")
         actual_results: dict[str, dict[str, float | None]] = {}
         for ticker in tickers:

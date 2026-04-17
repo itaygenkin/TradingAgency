@@ -23,6 +23,7 @@ def run_night_audit() -> None:
     tickers = [prediction["ticker"] for prediction in pending_predictions]
     actual_market_data = MarketProvider.get_actual_market_performance(tickers)
 
+    updated_to_process: list = []
     for prediction in pending_predictions:
         ticker = prediction["ticker"]
         actual = actual_market_data.get(ticker)
@@ -32,13 +33,17 @@ def run_night_audit() -> None:
 
         is_correct, score = validator.evaluate(prediction, actual)
 
-        db.update_evening_validation(
-            ticker=ticker,
-            actual_data=actual,
-            is_correct=is_correct,
-            score=score
+        updated_record = (
+            actual.get("open"),
+            actual.get("actual_change_pct"),
+            is_correct,
+            score,
+            ticker
         )
+        updated_to_process.append(updated_record)
 
+    if updated_to_process:
+        db.bulk_update_evening_validation(updated_to_process)
     logger.info(f"night audit completed for {len(pending_predictions)} pending predictions")
 
 

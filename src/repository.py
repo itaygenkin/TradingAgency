@@ -66,9 +66,7 @@ class MarketRepository:
              predictions[ticker].get("predicted_move", "Neutral"),
              report_path) for ticker in predictions
         ]
-        print()
-        print(predictions_list)
-        print()
+
         self._bulk_insert_morning_predictions(predictions_list)
 
     def bulk_update_evening_validation(self, update_data_list: list) -> None:

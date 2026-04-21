@@ -54,7 +54,8 @@ class MarketRepository:
                 with conn.cursor() as cur:
                     cur.executemany(query, prediction_list)
                     conn.commit()
-            logger.info(f"bulk insert morning predictions for tickers: {(prediction.next() for prediction in prediction_list)}")
+
+            logger.info(f"bulk insert morning predictions for tickers: {[prediction[0] for prediction in prediction_list]}")
         except psycopg2.Error as e:
             logger.error(f"failed to bulk insert morning predictions. {e}")
 

@@ -61,10 +61,10 @@ class MarketRepository:
     def bulk_insert_morning_predictions(self, predictions: dict[str, dict[str, float | str]], report_path: str) -> None:
         predictions_list: list[tuple] = [
             (ticker,
-             predictions[ticker].get("prev_close_price"),
+             predictions[ticker].get("last_close"),
              predictions[ticker].get("pre_market_price"),
              predictions[ticker].get("predicted_move", "Neutral"),
-             report_path) for ticker in predictions
+             report_path) for ticker in predictions if predictions[ticker]["status"] == "success"
         ]
 
         self._bulk_insert_morning_predictions(predictions_list)

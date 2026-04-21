@@ -28,23 +28,29 @@ class MarketProvider:
         for ticker in tickers:
             try:
                 stock = yf.Ticker(ticker)
-                df: pd.DataFrame = stock.history(period="1d", interval="1m", prepost=True)
+                hist = stock.history(period="2d")
 
-                if df.empty:
-                    logger.warning(f"No data for {ticker}. Skipping.")
-                    results[ticker] = {"status": "failure"}
-                    continue
+                if len(hist) < 2:
+                    raise MarketDataError(f"no historical data found for {ticker}")
 
-                last_price: float = float(df["Close"].iloc[-1])
-                prev_close: float = stock.info.get("previousClose", last_price)
-                change_pct: float = ((last_price - prev_close) / prev_close) * 100
+                yesterday_close = float(hist['Close'].iloc[-1])
+                day_before_yesterday_close = float(hist['Close'].iloc[-2])
+                yesterday_change_pct = ((yesterday_close - day_before_yesterday_close) / day_before_yesterday_close) * 100
+
+                # Data from fast_info (More accurate for real-time)
+                info = stock.fast_info
+                current_pre_market_price = info["last_price"]
+                # Use regularMarketPreviousClose to ensure we compare against the 4:00 PM close
+                reg_prev_close = info["regularMarketPreviousClose"]
+
+                pre_market_gap_pct = ((current_pre_market_price - reg_prev_close) / reg_prev_close) * 100
 
                 results[ticker] = {
                     "status": "success",
-                    "prev_close": round(last_price, 2),
-                    "price": round(last_price, 2),
-                    "change_pct": round(change_pct, 2),
-                    "timestamp": str(df.index[-1])
+                    "last_close": round(reg_prev_close, 2),
+                    "last_session_change_pct": round(yesterday_change_pct, 2),
+                    "pre_market_price": round(current_pre_market_price, 2),
+                    "pre_market_gap_pct": round(pre_market_gap_pct, 2),
                 }
 
             except Exception as e:

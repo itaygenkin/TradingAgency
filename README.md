@@ -5,24 +5,30 @@ An automated end-to-end pipeline that performs pre-market stock analysis using L
 
 ## Project Structure
 ```text
-├── data/                   # Local storage for Markdown reports
+├── data/                   # Generated Markdown reports & logs
 ├── src/
-│   ├── audit_service.py    # LLM logic for performance validation
-│   ├── config.py   
-│   ├── data_access.py      # PostgreSQL Repository
-│   ├── exceptions.py
-│   ├── llm_engine.py       # Main AI Analysis & Parser logic
-│   └── market_provider.py  # Data fetching from yfinance/web
-├── day_analysis.py     # Morning Pipeline (Pre-market)
-├── night_audit.py      # Evening Pipeline (Post-market)
-└── .env                # API keys and DB credentials (ignored by git)
+│   ├── core/               # Business Logic
+│   │   ├── llm_engine.py       # LLM report generation & parsing
+│   │   └── audit_service.py    # Performance evaluation logic
+│   ├── adapters/           # External System Interfaces
+│   │   ├── repository.py       # PostgreSQL Repository (Bulk Ops)
+│   │   └── market_provider.py  # yfinance & news fetching
+│   ├── models/             # Data Blueprints
+│   │   └── snapshot.py         # MarketSnapshot Data Class
+│   ├── utils/              # Shared Helpers
+│   │   ├── exceptions.py       
+│   │   └── logger.py         
+│   └── config.py           # Environment & Watchlist settings
+├── tests/
+├── day_analysis.py         # Entry point: Morning Pipeline
+└── night_audit.py          # Entry point: Evening Audit
 ```
 ---
 
 ## Tech Stack
 *   **Language:** Python 3.13+
 *   **AI Engine:** Google Gemini (via LangChain)
-*   **Database:** PostgreSQL (with `psycopg2` for bulk operations)
+*   **Database:** PostgreSQL 16 (with `psycopg2` for bulk operations)
 *   **Data Sources:** `yfinance` for stock data, `DuckDuckGo` (News catalysts)
 
 ---

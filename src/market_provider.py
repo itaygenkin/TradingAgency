@@ -26,41 +26,50 @@ class MarketProvider:
         logger.info(f"fetching market data for {len(tickers)} stocks.")
 
         for ticker in tickers:
-            try:
-                stock = yf.Ticker(ticker)
-                hist = stock.history(period="2d")
-
-                if len(hist) < 2:
-                    raise MarketDataError(f"no historical data found for {ticker}")
-
-                yesterday_close = float(hist['Close'].iloc[-1])
-                day_before_yesterday_close = float(hist['Close'].iloc[-2])
-                yesterday_change_pct = ((yesterday_close - day_before_yesterday_close) / day_before_yesterday_close) * 100
-
-                # Data from fast_info (More accurate for real-time)
-                info = stock.fast_info
-                current_pre_market_price = info["last_price"]
-                # Use regularMarketPreviousClose to ensure we compare against the 4:00 PM close
-                reg_prev_close = info["regularMarketPreviousClose"]
-
-                pre_market_gap_pct = ((current_pre_market_price - reg_prev_close) / reg_prev_close) * 100
-
-                results[ticker] = {
-                    "status": "success",
-                    "last_close": round(reg_prev_close, 2),
-                    "last_session_change_pct": round(yesterday_change_pct, 2),
-                    "pre_market_price": round(current_pre_market_price, 2),
-                    "pre_market_gap_pct": round(pre_market_gap_pct, 2),
-                }
-
-            except Exception as e:
-                logger.error(f"error fetching data for {ticker}: {str(e)}")
-                results[ticker] = {"status": "failure"}
+            results[ticker] = MarketProvider._fetch_single_ticker_premarket_data(ticker)
 
         if not results:
             raise MarketDataError("No market data could be fetched for any ticker")
 
         return results
+
+    @staticmethod
+    def _fetch_single_ticker_premarket_data(ticker: str) -> dict[str, Any]:
+        """
+        Helper function to fetch pre-market or latest trading data for a single stock ticker.
+        :param ticker: stock symbol (e.g., "AAPL").
+        :return: a dictionary containing price, change percentage, and volume for the ticker, or a failure status.
+        """
+        try:
+            stock = yf.Ticker(ticker)
+            hist = stock.history(period="2d")
+
+            if len(hist) < 2:
+                raise MarketDataError(f"no historical data found for {ticker}")
+
+            yesterday_close = float(hist['Close'].iloc[-1])
+            day_before_yesterday_close = float(hist['Close'].iloc[-2])
+            yesterday_change_pct = ((yesterday_close - day_before_yesterday_close) / day_before_yesterday_close) * 100
+
+            # Data from fast_info (More accurate for real-time)
+            info = stock.fast_info
+            current_pre_market_price = info["last_price"]
+            # Use regularMarketPreviousClose to ensure we compare against the 4:00 PM close
+            reg_prev_close = info["regularMarketPreviousClose"]
+
+            pre_market_gap_pct = ((current_pre_market_price - reg_prev_close) / reg_prev_close) * 100
+
+            return {
+                "status": "success",
+                "last_close": round(reg_prev_close, 2),
+                "last_session_change_pct": round(yesterday_change_pct, 2),
+                "pre_market_price": round(current_pre_market_price, 2),
+                "pre_market_gap_pct": round(pre_market_gap_pct, 2),
+            }
+
+        except Exception as e:
+            logger.error(f"error fetching data for {ticker}: {str(e)}")
+            return {"status": "failure"}
 
     @staticmethod
     def _get_stock_news(ticker: str) -> str:

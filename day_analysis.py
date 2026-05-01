@@ -8,7 +8,7 @@ from src.core_logic.llm_engine import MarketAnalysisAgent
 from src.config import WATCHLIST, REPORT_FILE_PREFIX
 from src.adapters.market_provider import MarketProvider
 from src.adapters.repository import MarketRepository
-from src.utils.utils import ensure_directories, save_report_to_file
+from src.utils.utils import ensure_directories, save_report_to_file, clean_report
 
 logger = get_logger("day_analysis")
 
@@ -30,11 +30,12 @@ def run_day_analysis() -> None:
         logger.info("step 2: sending data to agent for analysis and creating report")
         report = agent.analyze_market_data(market_data, news_data)
 
-        logger.info("step 3: saving report to file")
-        report_path: str = save_report_to_file(report_name=REPORT_FILE_PREFIX, report_content=report)
+        logger.info("step 3: extracting predictions from report")
+        predictions_dict = agent.extract_predictions(report)  # TODO: verify it runs properly
 
-        logger.info("step 4: extracting predictions from report")
-        predictions_dict = agent.extract_predictions(report)
+        logger.info("step 4: clean and save report to file")
+        report = clean_report(report)
+        report_path: str = save_report_to_file(report_name=REPORT_FILE_PREFIX, report_content=report)
 
         logger.info("step 5: inserting report into database")
         for snapshot in market_data:

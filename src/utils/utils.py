@@ -17,3 +17,10 @@ def save_report_to_file(report_name: str, report_content: str) -> str:
         f.write(report_content)
 
     return file_path
+
+def clean_report(report: str) -> str:
+    end_of_report = report.find("DATA_START")
+    if end_of_report > 0:
+        return report[:end_of_report]
+
+    return report

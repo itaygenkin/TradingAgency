@@ -7,8 +7,7 @@ logger = get_logger("ValidationMain")
 
 def run_night_audit() -> None:
     logger.info("starting Night Audit pipeline")
-    if not MarketProvider.is_market_open_today():
-        return
+
     db = MarketRepository()
     validator = PerformanceValidator()
 
@@ -48,6 +47,9 @@ def run_night_audit() -> None:
 
 
 if __name__ == "__main__":
+    if not MarketProvider.is_market_open_today():
+        exit(1)
+
     run_night_audit()
 
 

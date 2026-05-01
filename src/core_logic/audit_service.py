@@ -1,8 +1,8 @@
 from typing import Any
 
-from src.llm_engine import MarketAnalysisAgent
+from src.core_logic.llm_engine import MarketAnalysisAgent
 from src.config import VALIDATION_LOG_FILE
-from src.logger import get_logger
+from src.utils.logger import get_logger
 
 
 logger = get_logger("ValidationService", log_file=VALIDATION_LOG_FILE)

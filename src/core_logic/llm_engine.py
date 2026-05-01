@@ -3,10 +3,10 @@ import re
 
 from dotenv import load_dotenv
 from langchain_google_genai import ChatGoogleGenerativeAI
-from typing import Any
 
 from src.config import MODEL_NAME, AGENT_ROLE, TEMPERATURE
-from src.logger import get_logger
+from src.models.models import MarketSnapshot
+from src.utils.logger import get_logger
 
 logger = get_logger("market_agent")
 load_dotenv()
@@ -26,7 +26,7 @@ class MarketAnalysisAgent:
             temperature=TEMPERATURE
         )
 
-    def analyze_market_data(self, market_data: dict[str, Any], news_data: dict[str, str]) -> str:
+    def analyze_market_data(self, market_data: list[MarketSnapshot], news_data: dict[str, str]) -> str:
         """
         Synthesizes price data and news into a professional trading report.
         :param market_data: the dictionary returned by get_premarket_data.

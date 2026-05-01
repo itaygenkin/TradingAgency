@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-WATCHLIST: list[str] = ["AAPL", "AKAM", "NVDA", "GOOGL"]
+WATCHLIST: list[str] = ["AAPL", "AKAM", "NVDA", "^GSPC", "^IXIC", "^N225"]
 
 # --- AI Model Settings ---
 MODEL_NAME: str = "gemini-3-flash-preview"

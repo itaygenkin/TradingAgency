@@ -59,15 +59,11 @@ class MarketRepository:
         except psycopg2.Error as e:
             logger.error(f"failed to bulk insert morning predictions. {e}")
 
-    def bulk_insert_morning_predictions(self, predictions: dict[str, dict[str, float | str]], report_path: str) -> None:
-        predictions_list: list[tuple] = [
-            (ticker,
-             predictions[ticker].get("last_close"),
-             predictions[ticker].get("pre_market_price"),
-             predictions[ticker].get("predicted_move", "Neutral"),
-             report_path) for ticker in predictions if predictions[ticker]["status"] == "success"
-        ]
+    def bulk_insert_morning_predictions(self, predictions: list[MarketSnapshot], report_path: str) -> None:
+        for snapshot in predictions:
+            snapshot.report_path = report_path
 
+        predictions_list: list[tuple] = [snapshot.as_tuple() for snapshot in predictions]
         self._bulk_insert_morning_predictions(predictions_list)
 
     def bulk_update_evening_validation(self, update_data_list: list) -> None:

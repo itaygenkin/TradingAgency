@@ -1,13 +1,14 @@
 import sys
 from typing import Any
 
-from src.exceptions import MarketDataError, DatabaseConnectionError
-from src.logger import get_logger
-from src.llm_engine import MarketAnalysisAgent
+from src.models.models import MarketSnapshot
+from src.utils.exceptions import MarketDataError, DatabaseConnectionError
+from src.utils.logger import get_logger
+from src.core_logic.llm_engine import MarketAnalysisAgent
 from src.config import WATCHLIST, REPORT_FILE_PREFIX
-from src.market_provider import MarketProvider
-from src.repository import MarketRepository
-from src.utils import ensure_directories, save_report_to_file
+from src.adapters.market_provider import MarketProvider
+from src.adapters.repository import MarketRepository
+from src.utils.utils import ensure_directories, save_report_to_file
 
 logger = get_logger("day_analysis")
 
@@ -23,7 +24,7 @@ def run_day_analysis() -> None:
         agent = MarketAnalysisAgent()
 
         logger.info(f"step 1: fetching pre-market data and stock news for {len(WATCHLIST)} stocks")
-        market_data: dict[str, Any] = MarketProvider.get_premarket_data(WATCHLIST)
+        market_data: list[MarketSnapshot] = MarketProvider.get_premarket_data(WATCHLIST)
         news_data: dict[str, Any] = MarketProvider.get_stock_news_for_watchlist(WATCHLIST)
 
         logger.info("step 2: sending data to agent for analysis and creating report")
@@ -36,8 +37,8 @@ def run_day_analysis() -> None:
         predictions_dict = agent.extract_predictions(report)
 
         logger.info("step 5: inserting report into database")
-        for ticker in WATCHLIST:
-            market_data[ticker]["pred_move"] = predictions_dict.get(ticker, "Neutral")
+        for snapshot in market_data:
+            snapshot.prediction = predictions_dict.get(snapshot.ticker, "Neutral")
 
         db.bulk_insert_morning_predictions(market_data, report_path)
 

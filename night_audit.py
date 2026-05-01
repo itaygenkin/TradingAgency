@@ -1,7 +1,7 @@
-from src.logger import get_logger
-from src.audit_service import PerformanceValidator
-from src.market_provider import MarketProvider
-from src.repository import MarketRepository
+from src.utils.logger import get_logger
+from src.core_logic.audit_service import PerformanceValidator
+from src.adapters.market_provider import MarketProvider
+from src.adapters.repository import MarketRepository
 
 logger = get_logger("ValidationMain")
 

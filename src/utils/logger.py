@@ -21,7 +21,7 @@ def get_logger(service_name: str, log_file: str = "app.log") -> logging.Logger:
 
     logger.setLevel(logging.INFO)
 
-    log_format: str = "[%(asctime)s] [%(name)s] [%(levelname)s] - %(filename)s.%(funcName)s:  %(message)s"
+    log_format: str = "[%(asctime)s] [%(name)s] [%(levelname)s] - %(filename)s.%(funcName)s.%(lineno)d:  %(message)s"
     date_format: str = "%Y-%m-%d %H:%M:%S"
 
     formatter = CustomFormatter(log_format, datefmt=date_format)

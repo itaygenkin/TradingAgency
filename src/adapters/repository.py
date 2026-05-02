@@ -17,32 +17,43 @@ class MarketRepository:
     def _get_connection(self):
         return psycopg2.connect(**DB_CONFIG)
 
+    def _table_exists(self) -> bool:
+        check_table_query = f"SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = '{self._table_name}');"
+        with self._get_connection() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(check_table_query)
+                return cursor.fetchone()[0]
+
     def _create_table(self):
-        query = f"""
-        CREATE TABLE IF NOT EXISTS {self._table_name} (
-            id                  SERIAL      PRIMARY KEY,
-            ticker              VARCHAR(10) NOT NULL,
-            trade_date          DATE    DEFAULT CURRENT_DATE,
-            prev_close_price    DECIMAL(10, 2),
-            pre_market_price    DECIMAL(10, 2),
-            predicted_move      VARCHAR(20) DEFAULT 'Neutral', -- Bullish/Bearish/Neutral
-            actual_open_price   DECIMAL(10, 2),
-            actual_move_pct     DECIMAL(10, 2),
-            is_correct          BOOLEAN,
-            confidence_score    INTEGER,
-            ai_report_path      TEXT,
-            created_at          TIMESTAMP(0) NOT NULL DEFAULT date_trunc('minute', CURRENT_TIMESTAMP),
-            status              VARCHAR(20) NOT NULL DEFAULT 'PENDING'
-        );
-        """
         try:
+            if self._table_exists():
+                logger.info(f"Database table '{self._table_name}' already exists")
+                return
+
+            query = f"""
+            CREATE TABLE {self._table_name} (
+                id                  SERIAL      PRIMARY KEY,
+                ticker              VARCHAR(10) NOT NULL,
+                trade_date          DATE    DEFAULT CURRENT_DATE,
+                prev_close_price    DECIMAL(10, 2),
+                pre_market_price    DECIMAL(10, 2),
+                predicted_move      VARCHAR(20) DEFAULT 'Neutral', -- Bullish/Bearish/Neutral
+                actual_open_price   DECIMAL(10, 2),
+                actual_move_pct     DECIMAL(10, 2),
+                is_correct          BOOLEAN,
+                confidence_score    INTEGER,
+                ai_report_path      TEXT,
+                created_at          TIMESTAMP(0) NOT NULL DEFAULT date_trunc('minute', CURRENT_TIMESTAMP),
+                status              VARCHAR(20) NOT NULL DEFAULT 'PENDING'
+            );
+            """
             with self._get_connection() as conn:
                 with conn.cursor() as cursor:
                     cursor.execute(query)
                     conn.commit()
-            logger.info(f"database table '{self._table_name}' created")
+            logger.info(f"Database table '{self._table_name}' created")
         except psycopg2.Error as e:
-            logger.error("failed to create table", e)
+            logger.error(f"Failed to ensure table '{self._table_name}' exists or was created: {e}")
 
     def _bulk_insert_morning_predictions(self, prediction_list: list) -> None:
         query = f"""

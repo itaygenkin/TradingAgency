@@ -13,12 +13,3 @@ class MarketSnapshot:
     prediction: Optional[str] = None  # will be filled after AI analysis
     report_path: Optional[str] = None
 
-    def as_tuple(self) -> tuple:
-        """Convert the MarketSnapshot instance into a tuple for database insertion."""
-        return (
-            self.ticker,
-            self.last_close,
-            self.pre_market_price,
-            self.prediction or "Neutral",
-            self.report_path or "",
-        )

@@ -1,3 +1,4 @@
+from dataclasses import astuple
 from typing import Any
 
 import psycopg2
@@ -76,7 +77,7 @@ class MarketRepository:
         for snapshot in predictions:
             snapshot.report_path = report_path
 
-        predictions_list: list[tuple] = [snapshot.as_tuple() for snapshot in predictions]
+        predictions_list: list[tuple] = [astuple(snapshot) for snapshot in predictions]
         self._bulk_insert_morning_predictions(predictions_list)
 
     def bulk_update_evening_validation(self, update_data_list: list) -> None:

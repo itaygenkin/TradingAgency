@@ -30,19 +30,19 @@ def run_night_audit() -> None:
         if not actual:
             continue
 
-        is_correct, score = validator.evaluate(prediction, actual)
-
-        updated_record = (
-            actual.get("open"),
-            actual.get("actual_change_pct"),
-            is_correct,
-            score,
-            ticker
-        )
-        updated_to_process.append(updated_record)
+        evaluation: EvaluationResult = validator.evaluate(prediction, actual)
+        if evaluation.is_success():
+            updated_to_process.append((
+                actual.get("open"),
+                actual.get("actual_change_pct"),
+                evaluation.value.is_correct,
+                evaluation.value.confidence_score,
+                ticker
+            ))
 
     if updated_to_process:
         db.bulk_update_evening_validation(updated_to_process)
+
     logger.info(f"night audit completed for {len(pending_predictions)} pending predictions")
 
 

@@ -2,6 +2,8 @@ from typing import Any
 
 from src.core_logic.llm_engine import MarketAnalysisAgent
 from src.config import VALIDATION_LOG_FILE
+from src.models.Result import EvaluationResult, EvaluationValue
+from src.models.result_status import ResultStatus
 from src.utils.logger import get_logger
 
 
@@ -12,7 +14,7 @@ class PerformanceValidator:
     def __init__(self):
         self.agent = MarketAnalysisAgent()
 
-    def evaluate(self, prediction_row: dict[str, Any], actual_data: dict[str, Any]) -> tuple[bool, int]:
+    def evaluate(self, prediction_row: dict[str, Any], actual_data: dict[str, Any]) -> EvaluationResult:
         """
         compares morning predictions with evening reality using the LLM
         :param prediction_row: dictionary containing ticker, predicted_move, etc.
@@ -46,10 +48,13 @@ class PerformanceValidator:
             score = int(parts[1].strip())
 
             logger.info(f"audit result for {ticker}: Correct: {is_correct}, Score: {score}")
-            return is_correct, score
+            return EvaluationResult(status=ResultStatus.SUCCESS,
+                                    value=EvaluationValue(is_correct=is_correct, confidence_score=score))
         except Exception as e:
             logger.error(f"failed to evaluate performance for {ticker}: {e}")
             # default fallback in case of llm error
-            return False, 0
+            return EvaluationResult(status=ResultStatus.FAILURE,
+                                    msg="Failed to evaluate performance",
+                                    value=None)
 
 

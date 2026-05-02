@@ -11,7 +11,7 @@ logger = get_logger(__name__)
 
 class MarketRepository:
     def __init__(self):
-        self._table_name: str = "market"
+        self._table_name: str = "market_performance"
         self._create_table()
 
     def _get_connection(self):

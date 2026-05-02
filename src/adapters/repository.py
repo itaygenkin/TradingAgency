@@ -43,8 +43,9 @@ class MarketRepository:
                 is_correct          BOOLEAN,
                 confidence_score    INTEGER,
                 ai_report_path      TEXT,
+                status              VARCHAR(20) NOT NULL DEFAULT 'PENDING',
                 created_at          TIMESTAMP(0) NOT NULL DEFAULT date_trunc('minute', CURRENT_TIMESTAMP),
-                status              VARCHAR(20) NOT NULL DEFAULT 'PENDING'
+                updated_at          TIMESTAMP(0) NOT NULL DEFAULT date_trunc('minute', CURRENT_TIMESTAMP)
             );
             """
             with self._get_connection() as conn:
@@ -85,7 +86,8 @@ class MarketRepository:
                 actual_move_pct = %s,
                 is_correct = %s,
                 confidence_score = %s,
-                status = 'COMPLETED'
+                status = 'COMPLETED',
+                updated_at = date_trunc('minute', CURRENT_TIMESTAMP)
             WHERE ticker = %s AND trade_date = CURRENT_DATE;
         """
         try:

@@ -36,7 +36,9 @@ class PerformanceValidator:
 
         try:
             response = self.agent.llm.invoke(prompt)
-            result_text = str(response.content).strip()
+            if not response:
+                raise Exception()
+            result_text = response.content if type(response.content) == str else str(response.content[0])
 
             # parsing the llm response
             parts = result_text.split(",")

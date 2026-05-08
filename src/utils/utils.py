@@ -36,7 +36,7 @@ def zip_prediction_and_actual_market_data(pending_predictions: dict[str, Any], a
     """
     zipped_data = []
     for actual_data in actual_market_data:
-        if actual_data.status == ResultStatus.SUCCESS:
+        if actual_data.is_success():
             ticker = actual_data.value.ticker
             prediction = pending_predictions.get(ticker)
             if prediction:

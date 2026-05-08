@@ -136,7 +136,7 @@ class MarketProvider:
     def is_market_open_today() -> bool:
         today = datetime.today()
         if today.weekday() >= 5:  # Saturday and Sunday
-            logger.info("today is weekend. market is closed.")
+            logger.info(f"today({today.weekday()}) is weekend. market is closed.")
             return False
         # TODO: handle holidays
         return True

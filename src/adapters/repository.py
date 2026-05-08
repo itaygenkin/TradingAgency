@@ -1,11 +1,11 @@
 from dataclasses import astuple
-from typing import Any
+from typing import Any, Iterable
 
 import psycopg2
 from psycopg2.extras import RealDictCursor, execute_batch
 
 from src.config import DB_CONFIG
-from src.models.models import MarketSnapshot
+from src.models.models import Prediction
 from src.utils.logger import get_logger
 logger = get_logger(__name__)
 
@@ -61,7 +61,7 @@ class MarketRepository:
         query = f"""
             INSERT INTO {self._table_name} (
             ticker, prev_close_price, pre_market_price, predicted_move, ai_report_path, status)
-            VALUES (%s, %s, %s, %s, %s, 'PENDING')
+            VALUES (%s, %s, %s, %s, %s, %s);
         """
         try:
             with self._get_connection() as conn:
@@ -73,10 +73,7 @@ class MarketRepository:
         except psycopg2.Error as e:
             logger.error(f"failed to bulk insert morning predictions. {e}")
 
-    def bulk_insert_morning_predictions(self, predictions: list[MarketSnapshot], report_path: str) -> None:
-        for snapshot in predictions:
-            snapshot.report_path = report_path
-
+    def bulk_insert_morning_predictions(self, predictions: Iterable[Prediction]) -> None:
         predictions_list: list[tuple] = [astuple(snapshot) for snapshot in predictions]
         self._bulk_insert_morning_predictions(predictions_list)
 

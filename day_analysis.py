@@ -1,7 +1,7 @@
 import sys
 from typing import Any
 
-from src.models.models import MarketSnapshot
+from src.models.models import MarketSnapshot, Prediction
 from src.utils.exceptions import MarketDataError, DatabaseConnectionError
 from src.utils.logger import get_logger
 from src.core_logic.llm_engine import MarketAnalysisAgent
@@ -14,10 +14,10 @@ logger = get_logger("day_analysis")
 
 
 def run_day_analysis() -> None:
-    logger.info("starting day analysis pipeline")
-    ensure_directories()
     if not MarketProvider.is_market_open_today():
         return
+    ensure_directories()
+    logger.info("starting day analysis pipeline")
 
     try:
         db = MarketRepository()
@@ -37,11 +37,13 @@ def run_day_analysis() -> None:
         report = clean_report(report)
         report_path: str = save_report_to_file(report_name=REPORT_FILE_PREFIX, report_content=report)
 
-        logger.info("step 5: inserting report into database")
+        logger.info("preparing data to insert into database")
         for snapshot in market_data:
             snapshot.prediction = predictions_dict.get(snapshot.ticker, "Neutral")
+            snapshot.report_path = report_path
 
-        db.bulk_insert_morning_predictions(market_data, report_path)
+        logger.info("step 5: inserting report into database")
+        db.bulk_insert_morning_predictions(map(Prediction.convert_snapshot_to_prediction, market_data))
 
     except DatabaseConnectionError as e:
         logger.error(f"DATABASE CONNECTION ERROR: {e}")

@@ -13,3 +13,23 @@ class MarketSnapshot:
     prediction: Optional[str] = None  # will be filled after AI analysis
     report_path: Optional[str] = None
 
+
+@dataclass
+class Prediction:
+    ticker: str
+    prev_close_price: float
+    pre_market_price: float
+    predicted_move: str
+    report_path: Optional[str]
+    status: str = "PENDING"
+
+    @staticmethod
+    def convert_snapshot_to_prediction(market_snapshot: MarketSnapshot) -> "Prediction":
+        return Prediction(
+            ticker=market_snapshot.ticker,
+            prev_close_price=market_snapshot.last_close,
+            pre_market_price=market_snapshot.pre_market_price,
+            predicted_move=market_snapshot.prediction or "Neutral",
+            report_path=market_snapshot.report_path,
+            status="PENDING"
+        )

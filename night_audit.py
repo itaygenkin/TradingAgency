@@ -1,8 +1,9 @@
-from src.models.Result import EvaluationResult
+from src.models.result import EvaluationResult
 from src.utils.logger import get_logger
 from src.core_logic.audit_service import PerformanceValidator
 from src.adapters.market_provider import MarketProvider
 from src.adapters.repository import MarketRepository
+from src.utils.utils import zip_prediction_and_actual_market_data
 
 logger = get_logger("ValidationMain")
 

@@ -4,7 +4,6 @@ from typing import Any
 
 from src.config import REPORTS_DIR, REPORT_FILE_EXTENSION
 from src.models.result import Result
-from src.models.result_status import ResultStatus
 
 
 def ensure_directories() -> None:

@@ -6,7 +6,9 @@ import yfinance as yf
 import pandas as pd
 from langchain_community.tools import DuckDuckGoSearchRun
 
-from src.models.models import MarketSnapshot
+from src.models.models import MarketSnapshot, MarketPerformance
+from src.models.result import Result
+from src.models.result_status import ResultStatus
 from src.utils.exceptions import MarketDataError
 from src.utils.logger import get_logger
 
@@ -100,37 +102,38 @@ class MarketProvider:
         return results
 
     @staticmethod
-    def get_actual_market_performance(tickers: list[str]) -> dict[str, dict[str, float | None]]:
+    def get_actual_market_performance(tickers: list[str]) -> list[Result[MarketPerformance]]:
         logger.info(f"fetching actual market performance for {len(tickers)} stocks")
-        actual_results: dict[str, dict[str, float | None]] = {}
+
+        results: list[Result[MarketPerformance]] = []
         for ticker in tickers:
             try:
                 stock = yf.Ticker(ticker)
                 df: pd.DataFrame = stock.history(period="1d", interval="1m")
 
                 if not df.empty:
-                    open_price: float = float(df["Open"].iloc[0])
-                    current_price: float = float(df["Close"].iloc[-1])
-                    day_change_pct: float = ((current_price - open_price) / open_price) * 100
+                    open_price: float = round(float(df["Open"].iloc[0]), 2)
+                    current_price: float = round(float(df["Close"].iloc[-1]), 2)
+                    day_change_pct: float = round(((current_price - open_price) / open_price) * 100, 2)
 
-                    actual_results[ticker] = {
-                        "open": round(open_price, 2),
-                        "close": round(current_price, 2),
-                        "actual_change_pct": round(day_change_pct, 2),
-                    }
+                    stock_performance: MarketPerformance = MarketPerformance(
+                        ticker=ticker,
+                        open=open_price,
+                        close=current_price,
+                        actual_change_pct=day_change_pct,
+                    )
+                    results.append(Result(status=ResultStatus.SUCCESS, value=stock_performance))
                     logger.info(f"validated {ticker}: open ${open_price}, Close ${current_price}")
                 else:
-                    actual_results[ticker] = {
-                        "open": None,
-                        "close": None,
-                        "actual_change_pct": None,
-                    }
+                    results.append(Result(status=ResultStatus.FAILURE,
+                                          value=None,
+                                          msg=f"no historical data found for {ticker}"))
                     logger.warning(f"no intraday data for {ticker} validation")
 
             except Exception as e:
                 logger.error(f"error validating performance for {ticker}: {str(e)}")
 
-        return actual_results
+        return results
 
     @staticmethod
     def is_market_open_today() -> bool:

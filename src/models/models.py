@@ -33,3 +33,11 @@ class Prediction:
             report_path=market_snapshot.report_path,
             status="PENDING"
         )
+
+
+@dataclass
+class MarketPerformance:
+    ticker: str
+    open: float
+    close: float
+    actual_change_pct: float

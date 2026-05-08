@@ -99,11 +99,12 @@ class MarketRepository:
             logger.error(f"failed to update {len(update_data_list)} audit records. {e}")
             raise
 
-    def get_pending_predictions(self) -> list[dict[str, Any]]:
+    def get_pending_predictions(self) -> dict[str, Any]:
+        # TODO: can the return value be one of the model
         query = f"""
-        SELECT ticker, pre_market_price, prev_close_price, predicted_move
-        FROM {self._table_name}
-        WHERE trade_date = CURRENT_DATE AND status = 'PENDING';
+            SELECT ticker, pre_market_price, prev_close_price, predicted_move
+            FROM {self._table_name}
+            WHERE trade_date = CURRENT_DATE AND status = 'PENDING';
         """
         try:
             with self._get_connection() as conn:
@@ -112,10 +113,10 @@ class MarketRepository:
                     results = rd_cur.fetchall()
 
                     # convert RealDictRow objects to standard dictionaries for cleaner precessing
-                    predictions = [dict(row) for row in results]
+                    predictions = {str(row.get("ticker")): dict(row) for row in results if row.get("ticker")}
 
                     logger.info(f"retrieved {len(predictions)} pending predictions for audit")
                     return predictions
         except psycopg2.Error as e:
             logger.error(f"failed to get pending predictions. {e}")
-            return []
+            return {}

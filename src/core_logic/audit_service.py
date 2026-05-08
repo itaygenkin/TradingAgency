@@ -2,7 +2,8 @@ from typing import Any
 
 from src.core_logic.llm_engine import MarketAnalysisAgent
 from src.config import VALIDATION_LOG_FILE
-from src.models.Result import EvaluationResult, EvaluationValue
+from src.models.models import MarketPerformance
+from src.models.result import EvaluationResult, EvaluationValue
 from src.models.result_status import ResultStatus
 from src.utils.logger import get_logger
 
@@ -14,7 +15,7 @@ class PerformanceValidator:
     def __init__(self):
         self.agent = MarketAnalysisAgent()
 
-    def evaluate(self, prediction_row: dict[str, Any], actual_data: dict[str, Any]) -> EvaluationResult:
+    def evaluate(self, prediction_row: dict, actual_data: MarketPerformance) -> EvaluationResult:
         """
         compares morning predictions with evening reality using the LLM
         :param prediction_row: dictionary containing ticker, predicted_move, etc.
@@ -27,8 +28,8 @@ class PerformanceValidator:
         prompt = (
             f"Review the following trading prediction for {ticker}:\n"
             f"- Predicted Move: {prediction_row.get("predicted_move")}\n"
-            f"- Actual Market Open Price: ${actual_data.get("open")}\n"
-            f"- Actual Price Change during session: {actual_data.get("actual_change_pct")}%\n\n"
+            f"- Actual Market Open Price: ${actual_data.open}\n"
+            f"- Actual Price Change during session: {actual_data.actual_change_pct}%\n\n"
             f"Criteria:\n"
             f"1. Was the direction (Bullish/Bearish/Neutral) correct based on the actual move?\n"
             f"2. Provide a confidence score between 0 and 100 based on accuracy.\n\n"

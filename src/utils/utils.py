@@ -1,7 +1,10 @@
 from datetime import datetime
 import os
+from typing import Any
 
 from src.config import REPORTS_DIR, REPORT_FILE_EXTENSION
+from src.models.result import Result
+from src.models.result_status import ResultStatus
 
 
 def ensure_directories() -> None:
@@ -24,3 +27,19 @@ def clean_report(report: str) -> str:
         return report[:end_of_report]
 
     return report
+
+
+def zip_prediction_and_actual_market_data(pending_predictions: dict[str, Any], actual_market_data: list[Result]) -> list[tuple[Any, Any]]:
+    """
+    Zips pending predictions with actual market data where the actual data is successful
+    and a corresponding prediction exists.
+    """
+    zipped_data = []
+    for actual_data in actual_market_data:
+        if actual_data.status == ResultStatus.SUCCESS:
+            ticker = actual_data.value.ticker
+            prediction = pending_predictions.get(ticker)
+            if prediction:
+                zipped_data.append((prediction, actual_data.value))
+
+    return zipped_data

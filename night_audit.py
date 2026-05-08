@@ -20,25 +20,22 @@ def run_night_audit() -> None:
         return
 
     # data extraction
-    tickers = [prediction["ticker"] for prediction in pending_predictions]
+    tickers = list(pending_predictions.keys())
     actual_market_data = MarketProvider.get_actual_market_performance(tickers)
 
+    # zip the prediction and the actual data
+    zipped_prediction_actual_market_data = zip_prediction_and_actual_market_data(pending_predictions, actual_market_data)
+
     updated_to_process: list = []
-    for prediction in pending_predictions:
-        ticker = prediction["ticker"]
-        actual = actual_market_data.get(ticker)
-
-        if not actual:
-            continue
-
+    for prediction, actual in zipped_prediction_actual_market_data:
         evaluation: EvaluationResult = validator.evaluate(prediction, actual)
         if evaluation.is_success():
             updated_to_process.append((
-                actual.get("open"),
-                actual.get("actual_change_pct"),
+                actual.open,
+                actual.actual_change_pct,
                 evaluation.value.is_correct,
                 evaluation.value.confidence_score,
-                ticker
+                actual.ticker
             ))
 
     if updated_to_process:
@@ -52,7 +49,3 @@ if __name__ == "__main__":
         exit(1)
 
     run_night_audit()
-
-
-
-

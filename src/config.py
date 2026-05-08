@@ -12,7 +12,7 @@ TEMPERATURE: float = 0.2
 
 # --- File System Settings ---
 REPORTS_DIR: str = "./data/reports"
-REPORT_FILE_PREFIX: str = "prediction_market_report"
+REPORT_FILE_PREFIX: str = "market_report"
 REPORT_FILE_EXTENSION: str = "md"
 
 # --- Analysis Preferences ---

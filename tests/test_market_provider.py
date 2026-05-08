@@ -9,7 +9,7 @@ def test_market_snapshot_creation():
     """Test if the Data Class initializes correctly"""
     snapshot = MarketSnapshot(
         ticker="AAPL",
-        last_close=150.0,
+        yesterday_close_price=150.0,
         last_session_change_pct=1.5,
         pre_market_price=152.0,
         pre_market_gap_pct=1.33

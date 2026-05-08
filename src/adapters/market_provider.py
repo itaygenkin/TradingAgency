@@ -64,7 +64,7 @@ class MarketProvider:
 
             return MarketSnapshot(
                 ticker=ticker,
-                last_close=round(reg_prev_close, 2),
+                yesterday_close_price=round(reg_prev_close, 2),
                 last_session_change_pct=round(yesterday_change_pct, 2),
                 pre_market_price=round(current_pre_market_price, 2),
                 pre_market_gap_pct=round(pre_market_gap_pct, 2)

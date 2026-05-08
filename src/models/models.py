@@ -6,7 +6,7 @@ from typing import Optional
 class MarketSnapshot:
     """Blueprint for pre-market data fetched from yfinance."""
     ticker: str
-    last_close: float
+    yesterday_close_price: float
     last_session_change_pct: float
     pre_market_price: float
     pre_market_gap_pct: float
@@ -17,17 +17,17 @@ class MarketSnapshot:
 @dataclass
 class Prediction:
     ticker: str
-    prev_close_price: float
+    yesterday_close_price: float
     pre_market_price: float
     predicted_move: str
     report_path: Optional[str]
     status: str = "PENDING"
 
     @staticmethod
-    def convert_snapshot_to_prediction(market_snapshot: MarketSnapshot) -> "Prediction":
+    def convert_snapshot_to_prediction(market_snapshot: MarketSnapshot) -> Prediction:
         return Prediction(
             ticker=market_snapshot.ticker,
-            prev_close_price=market_snapshot.last_close,
+            yesterday_close_price=market_snapshot.yesterday_close_price,
             pre_market_price=market_snapshot.pre_market_price,
             predicted_move=market_snapshot.prediction or "Neutral",
             report_path=market_snapshot.report_path,

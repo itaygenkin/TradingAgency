@@ -19,7 +19,3 @@ class Result(Generic[T]):
 class EvaluationValue:
     is_correct: bool
     confidence_score: int
-
-
-class EvaluationResult(Result[EvaluationValue]):
-    pass

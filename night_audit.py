@@ -1,4 +1,4 @@
-from src.models.result import EvaluationResult
+from src.models.result import Result, EvaluationValue
 from src.utils.logger import get_logger
 from src.core_logic.audit_service import PerformanceValidator
 from src.adapters.market_provider import MarketProvider

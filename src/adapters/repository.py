@@ -68,8 +68,7 @@ class MarketRepository:
                 with conn.cursor() as cur:
                     cur.executemany(query, prediction_list)
                     conn.commit()
-
-            logger.info(f"bulk insert morning predictions for tickers: {[prediction[0] for prediction in prediction_list]}")
+            logger.info(f"bulk insert morning predictions for {cur.rowcount} tickers out of {len(prediction_list)} audit records")
         except psycopg2.Error as e:
             logger.error(f"failed to bulk insert morning predictions. {e}")
 
@@ -94,7 +93,7 @@ class MarketRepository:
                     execute_batch(cur, query, update_data_list)
                     conn.commit()
 
-            logger.info(f"successfully update {len(update_data_list)} audit records")
+            logger.info(f"successfully updated {cur.rowcount} audit records out of {len(update_data_list)}")
         except psycopg2.Error as e:
             logger.error(f"failed to update {len(update_data_list)} audit records. {e}")
             raise

@@ -28,17 +28,18 @@ def clean_report(report: str) -> str:
     return report
 
 
-def zip_prediction_and_actual_market_data(pending_predictions: dict[str, Any], actual_market_data: list[Result]) -> list[tuple[Any, Any]]:
+def zip_prediction_and_actual_market_data(pending_predictions: dict[str, Any],
+                                          actual_market_data_result_list: list[Result]) -> list[tuple[Any, Any]]:
     """
     Zips pending predictions with actual market data where the actual data is successful
     and a corresponding prediction exists.
     """
     zipped_data = []
-    for actual_data in actual_market_data:
-        if actual_data.is_success():
-            ticker = actual_data.value.ticker
+    for actual_result in actual_market_data_result_list:
+        if actual_result.is_success():
+            ticker = actual_result.value.ticker
             prediction = pending_predictions.get(ticker)
             if prediction:
-                zipped_data.append((prediction, actual_data.value))
+                zipped_data.append((prediction, actual_result.value))
 
     return zipped_data

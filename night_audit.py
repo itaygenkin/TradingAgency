@@ -22,27 +22,30 @@ def run_night_audit() -> None:
 
     # data extraction
     tickers = list(pending_predictions.keys())
-    actual_market_data = MarketProvider.get_actual_market_performance(tickers)
+    actual_market_data_result_list = MarketProvider.get_actual_market_performance(tickers)
 
     # zip the prediction and the actual data
-    zipped_prediction_actual_market_data = zip_prediction_and_actual_market_data(pending_predictions, actual_market_data)
+    zipped_prediction_actual_market_data = zip_prediction_and_actual_market_data(pending_predictions,
+                                                                                 actual_market_data_result_list)
 
-    updated_to_process: list = []
+    updates_to_process: list = []
     for prediction, actual in zipped_prediction_actual_market_data:
-        evaluation: EvaluationResult = validator.evaluate(prediction, actual)
+        evaluation: Result[EvaluationValue] = validator.evaluate(prediction, actual)
         if evaluation.is_success():
-            updated_to_process.append((
+            updates_to_process.append((
                 actual.open,
                 actual.actual_change_pct,
                 evaluation.value.is_correct,
                 evaluation.value.confidence_score,
                 actual.ticker
             ))
+        else:
+            logger.info(f"failed to evaluate performance for {actual.ticker}: {evaluation.msg}")
 
-    if updated_to_process:
-        db.bulk_update_evening_validation(updated_to_process)
+    if updates_to_process:
+        db.bulk_update_evening_validation(updates_to_process)
 
-    logger.info(f"night audit completed for {len(pending_predictions)} pending predictions")
+    logger.info(f"night audit completed for {len(updates_to_process)} out of {len(pending_predictions)} pending predictions")
 
 
 if __name__ == "__main__":

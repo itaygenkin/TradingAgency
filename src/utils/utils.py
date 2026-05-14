@@ -21,11 +21,11 @@ def save_report_to_file(report_name: str, report_content: str) -> str:
     return file_path
 
 def clean_report(report: str) -> str:
-    end_of_report = report.find("DATA_START")
+    end_of_report = report.find("DATA_SUMMARY")
     if end_of_report > 0:
-        return report[:end_of_report]
+        report = report[:end_of_report]
 
-    return report
+    return report.replace("$", "\\$")
 
 
 def zip_prediction_and_actual_market_data(pending_predictions: dict[str, Any],

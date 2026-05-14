@@ -41,7 +41,8 @@ class PerformanceValidator:
             response = self.agent.llm.invoke(prompt)
             if not response:
                 raise Exception()
-            result_text = response.content if type(response.content) == str else response.content[0]
+
+            result_text = PerformanceValidator.extract_text(response.content)
 
             # parsing the llm response
             parts = result_text.split(",")
@@ -58,4 +59,17 @@ class PerformanceValidator:
                                     msg="Failed to evaluate performance",
                                     value=None)
 
+    @staticmethod
+    def extract_text(response_content: Any):
+        if isinstance(response_content, str):
+            if "text" in response_content:
+                index = response_content.find("text")
+                return response_content[index + 1:].strip()
+            return response_content
+        elif isinstance(response_content, list) and len(response_content) > 0:
+            return response_content[0]["text"]
+        elif isinstance(response_content, dict):
+            return response_content["text"]
+        else:
+            raise ValueError("Unexpected LLM response format")
 

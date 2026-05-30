@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Optional
 
 from src.core_logic.llm_engine import MarketAnalysisAgent
 from src.config import VALIDATION_LOG_FILE
@@ -59,7 +59,7 @@ class PerformanceValidator:
                                     value=None)
 
     @staticmethod
-    def extract_text(response_content: Any):
+    def extract_text(response_content: Any) -> Optional[str]:
         if isinstance(response_content, str):
             if "text" in response_content:
                 index = response_content.find("text")

@@ -1,8 +1,12 @@
 from dataclasses import dataclass
+from enum import Enum
 from typing import Optional, TypeVar, Generic
-from src.models.result_status import ResultStatus
 
 T = TypeVar("T")
+
+class ResultStatus(Enum):
+    SUCCESS = "success"
+    FAILURE = "failure"
 
 
 @dataclass

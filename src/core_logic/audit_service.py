@@ -3,8 +3,7 @@ from typing import Any
 from src.core_logic.llm_engine import MarketAnalysisAgent
 from src.config import VALIDATION_LOG_FILE
 from src.models.models import MarketPerformance
-from src.models.result import EvaluationValue, Result
-from src.models.result_status import ResultStatus
+from src.models.result import EvaluationValue, Result, ResultStatus
 from src.utils.logger import get_logger
 
 

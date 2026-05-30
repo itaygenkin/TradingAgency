@@ -9,8 +9,7 @@ import pandas as pd
 from langchain_community.tools import DuckDuckGoSearchRun
 
 from src.models.models import MarketSnapshot, MarketPerformance
-from src.models.result import Result
-from src.models.result_status import ResultStatus
+from src.models.result import Result, ResultStatus
 from src.utils.exceptions import MarketDataError
 from src.utils.logger import get_logger
 

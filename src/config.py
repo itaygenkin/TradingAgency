@@ -8,7 +8,7 @@ WATCHLIST: list[str] = ["AAPL", "AKAM", "NVDA", "^GSPC", "^IXIC", "^N225"]
 
 # --- AI Model Settings ---
 MODEL_NAME: str = "gemini-3-flash-preview"
-TEMPERATURE: float = 0.2
+TEMPERATURE: float = 0.4
 
 # --- File System Settings ---
 REPORTS_DIR: str = "./data/reports"

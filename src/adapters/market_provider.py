@@ -2,6 +2,8 @@ from datetime import datetime
 import time
 from typing import Optional
 
+import pytz
+import pandas_market_calendars as mcal
 import yfinance as yf
 import pandas as pd
 from langchain_community.tools import DuckDuckGoSearchRun
@@ -137,10 +139,19 @@ class MarketProvider:
 
     @staticmethod
     def is_market_open_today() -> bool:
-        today = datetime.today()
-        if today.weekday() >= 5:  # Saturday and Sunday
-            logger.info(f"today({today.weekday()}) is weekend. market is closed.")
-            return False
-        # TODO: handle holidays
-        return True
+        # get the current date in New York time zone
+        ny_tz = pytz.timezone("America/New_York")
+        today_ny = datetime.now(ny_tz).date()
 
+        # load the NYSE calendar
+        nyse = mcal.get_calendar("NYSE")
+
+        # get the schedule for today (if is closed, the dataframe will be empty
+        schedule = nyse.schedule(start_date=today_ny, end_date=today_ny)
+
+        if schedule.empty:
+            logger.info(f"the market is closed today {today_ny}. no trading activity.")
+            return False
+
+        logger.info(f"the market is open today {today_ny}. proceeding with analysis.")
+        return True

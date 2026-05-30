@@ -14,7 +14,8 @@ An automated end-to-end pipeline that performs pre-market stock analysis using L
 │   │   ├── repository.py       # PostgreSQL Repository (Bulk Ops)
 │   │   └── market_provider.py  # yfinance & news fetching
 │   ├── models/             # Data Blueprints
-│   │   └── snapshot.py         # MarketSnapshot Data Class
+|   |   |   models.py
+│   │   └── result.py           # Result Data Class
 │   ├── utils/              # Shared Helpers
 │   │   ├── exceptions.py       
 │   │   └── logger.py         

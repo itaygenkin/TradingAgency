@@ -14,7 +14,7 @@ env/
 .local
 
 # Project specific data
-data/reports/*.txt
+data/
 
 # PyCharm / IDE specific
 .idea/
@@ -24,3 +24,6 @@ data/reports/*.txt
 Thumbs.db
 desktop.ini
 .DS_Store
+
+# Ignore specific files
+my_tasks.txt

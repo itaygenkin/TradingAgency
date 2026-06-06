@@ -22,7 +22,7 @@ def save_report_to_file(report_name: str, report_content: str) -> str:
 
 def clean_report(report: str) -> str:
     end_of_report = report.find("DATA_SUMMARY")
-    if end_of_report > 0:
+    if end_of_report >= 0:
         report = report[:end_of_report]
 
     return report.replace("$", "\\$")

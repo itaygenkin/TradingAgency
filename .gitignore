@@ -15,6 +15,7 @@ env/
 
 # Project specific data
 data/
+logs/
 
 # PyCharm / IDE specific
 .idea/

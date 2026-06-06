@@ -78,7 +78,7 @@ class MarketProvider:
             return None
 
     @staticmethod
-    def _get_stock_news(ticker: str) -> str:
+    def _get_stock_news(ticker: str) -> Result[str]:
         """
         searches for the most recent news for a specific ticker.
         """
@@ -88,16 +88,18 @@ class MarketProvider:
         try:
             # Performing the search using DuckDuckGo
             search_results: str = MarketProvider._search_tool.invoke(query)
-            return search_results
+            return Result(status=ResultStatus.SUCCESS, value=search_results)
         except Exception as e:
             logger.error(f"search failed for {ticker}: {str(e)}")
-            return "No recent news found."
+            return Result(status=ResultStatus.FAILURE, msg="No recent news found.", value=None)
 
     @staticmethod
     def get_stock_news_for_watchlist(tickers: list[str]) -> dict[str, str]:
         results: dict[str, str] = {}
         for ticker in tickers:
-            results[ticker] = MarketProvider._get_stock_news(ticker)
+            news_result = MarketProvider._get_stock_news(ticker)
+            if news_result.is_success():
+                results[ticker] = news_result.value
             time.sleep(0.3)  # to avoid hitting search rate limits
 
         return results

@@ -13,15 +13,24 @@ from src.utils.utils import ensure_directories, save_report_to_file, clean_repor
 logger = get_logger("day_analysis")
 
 
-def run_day_analysis() -> None:
+def preliminary_conditions() -> None:
     if not MarketProvider.is_market_open_today():
-        return
+        exit()
+
     ensure_directories()
+
+
+def run_day_analysis() -> None:
+    preliminary_conditions()
     logger.info("starting day analysis pipeline")
 
     try:
         db = MarketRepository()
         agent = MarketAnalysisAgent()
+
+        if db.has_run_today():
+            logger.info("day analysis has already been run today")
+            return
 
         logger.info(f"step 1: fetching pre-market data and stock news for {len(WATCHLIST)} stocks")
         market_data: list[MarketSnapshot] = MarketProvider.get_premarket_data(WATCHLIST)

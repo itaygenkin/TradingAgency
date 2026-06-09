@@ -119,3 +119,19 @@ class MarketRepository:
         except psycopg2.Error as e:
             logger.error(f"failed to get pending predictions. {e}")
             return {}
+
+    def has_run_today(self) -> bool:
+        query = f"""
+            SELECT EXISTS (
+                SELECT 1 FROM {self._table_name}
+                WHERE trade_date = CURRENT_DATE
+            );
+        """
+        try:
+            with self._get_connection() as conn:
+                with conn.cursor() as cursor:
+                    cursor.execute(query)
+                    return cursor.fetchone()[0]
+        except psycopg2.Error as e:
+            logger.error(f"failed to check if pipeline has run today. {e}")
+            return False

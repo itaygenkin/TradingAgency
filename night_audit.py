@@ -45,7 +45,7 @@ def run_night_audit() -> None:
     if updates_to_process:
         db.bulk_update_evening_validation(updates_to_process)
 
-    logger.info(f"night audit completed for {len(updates_to_process)} out of {len(pending_predictions)} pending predictions")
+    logger.info(f"night audit completed. processed {len(updates_to_process)} records.")
 
 
 if __name__ == "__main__":

@@ -151,8 +151,8 @@ class MarketProvider:
         schedule = nyse.schedule(start_date=today_ny, end_date=today_ny)
 
         if schedule.empty:
-            logger.info(f"the market is closed today {today_ny}. no trading activity.")
+            logger.info(f"the market is closed today ({today_ny}). no trading activity.")
             return False
 
-        logger.info(f"the market is open today {today_ny}. proceeding with analysis.")
+        logger.info(f"the market is open today ({today_ny}). proceeding with analysis.")
         return True

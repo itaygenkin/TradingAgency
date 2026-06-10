@@ -79,7 +79,8 @@ class MarketAnalysisAgent:
             lines = data_block.strip().split("\n")
             for line in lines:
                 if ':' in line:
-                    ticker, move = line.split(':')
+                    split_line = filter(lambda x: x, line.split(':'))
+                    ticker, move = split_line.__next__(), split_line.__next__()
                     predictions[ticker.strip()] = move.strip()
 
         logger.info(f"extracted {len(predictions)} predictions from report")

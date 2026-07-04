@@ -16,21 +16,24 @@ class MarketSnapshot:
 
 @dataclass
 class Prediction:
+    """the prediction the llm model predict for a ticker."""
     ticker: str
     yesterday_close_price: float
     pre_market_price: float
     predicted_move: str
     report_path: Optional[str]
+    llm_model: Optional[str]
     status: str = "PENDING"
 
     @staticmethod
-    def convert_snapshot_to_prediction(market_snapshot: MarketSnapshot) -> Prediction:
+    def convert_snapshot_to_prediction(market_snapshot: MarketSnapshot, llm_model: Optional[str] = None) -> Prediction:
         return Prediction(
             ticker=market_snapshot.ticker,
             yesterday_close_price=market_snapshot.yesterday_close_price,
             pre_market_price=market_snapshot.pre_market_price,
             predicted_move=market_snapshot.prediction or "Neutral",
             report_path=market_snapshot.report_path,
+            llm_model=llm_model,
             status="PENDING"
         )
 

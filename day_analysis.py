@@ -52,7 +52,9 @@ def run_day_analysis() -> None:
             snapshot.report_path = report_path
 
         logger.info("step 5: inserting report into database")
-        db.bulk_insert_morning_predictions(map(Prediction.convert_snapshot_to_prediction, market_data))
+        llm_model = agent.get_current_llm_model()
+        predictions = [Prediction.convert_snapshot_to_prediction(snapshot, llm_model) for snapshot in market_data]
+        db.bulk_insert_morning_predictions(predictions)
 
     except DatabaseConnectionError as e:
         logger.error(f"DATABASE CONNECTION ERROR: {e}")

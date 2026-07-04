@@ -26,6 +26,9 @@ class MarketAnalysisAgent:
             temperature=TEMPERATURE
         )
 
+    def get_current_llm_model(self) -> str:
+        return self.llm.model
+
     def analyze_market_data(self, market_data: list[MarketSnapshot], news_data: dict[str, str]) -> str:
         """
         Synthesizes price data and news into a professional trading report.

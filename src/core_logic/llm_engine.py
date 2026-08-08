@@ -18,7 +18,7 @@ class MarketAnalystAgent:
         """
         self.llm = llm or get_analysis_model()
 
-    def analyze_market_data(self, market_data: list[MarketSnapshot], news_data: dict[str, str]) -> tuple[str, Any]:
+    def analyze_market_data(self, market_data: list[MarketSnapshot], news_data: dict[str, str]) -> tuple[str, str]:
         """
         Synthesizes price data and news into a professional trading report.
         :param market_data: the dictionary returned by get_premarket_data.
@@ -58,13 +58,16 @@ class MarketAnalystAgent:
         try:
             content = response.content[0].get("text")
             used_model = response.response_metadata.get("model", "Unknown")
-        except (KeyError, IndexError):
+        except (KeyError, IndexError, TypeError):
             raise MarketDataError("couldn't parse or invoke market data analysis from LLM response")
 
         return content, used_model
 
     @staticmethod
     def extract_predictions(full_report: str) -> dict[str, str]:
+        if not full_report:
+            raise MarketDataError("report is empty")
+
         predictions: dict[str, str] = {}
         pattern = r"DATA_START\n(.*?)\nDATA_END"
         match = re.search(pattern, full_report, re.DOTALL)

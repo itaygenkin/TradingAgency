@@ -12,12 +12,14 @@ An automated end-to-end pipeline that performs pre-market stock analysis using L
 │   │   └── audit_service.py    # Performance evaluation logic
 │   ├── adapters/           # External System Interfaces
 │   │   ├── repository.py       # PostgreSQL Repository (Bulk Ops)
+│   │   ├── llm_factory.py      # LLM Factory for managing different Gemini models
 │   │   └── market_provider.py  # yfinance & news fetching
 │   ├── models/             # Data Blueprints
 |   |   |   models.py
 │   │   └── result.py           # Result Data Class
 │   ├── utils/              # Shared Helpers
-│   │   ├── exceptions.py       
+│   │   ├── exceptions.py     
+│   │   ├── utils.py 
 │   │   └── logger.py         
 │   └── config.py           # Environment & Watchlist settings
 ├── tests/

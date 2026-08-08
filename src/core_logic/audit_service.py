@@ -1,6 +1,6 @@
 from typing import Any, Optional
 
-from src.core_logic.llm_engine import MarketAnalysisAgent
+from src.core_logic.llm_engine import MarketAnalystAgent
 from src.config import VALIDATION_LOG_FILE
 from src.models.models import MarketPerformance
 from src.models.result import EvaluationValue, Result, ResultStatus
@@ -12,7 +12,7 @@ logger = get_logger("ValidationService", log_file=VALIDATION_LOG_FILE)
 
 class PerformanceValidator:
     def __init__(self):
-        self.agent = MarketAnalysisAgent()
+        self.agent = MarketAnalystAgent()
 
     def evaluate(self, prediction_row: dict, actual_data: MarketPerformance) -> Result[EvaluationValue]:
         """

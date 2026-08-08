@@ -11,8 +11,8 @@ from src.utils.logger import get_logger
 logger = get_logger("market_agent")
 load_dotenv()
 
-class MarketAnalysisAgent:
-    def __init__(self):
+class MarketAnalystAgent:
+    def __init__(self, llm: BaseChatModel = None):
         """
         initializes the AI Analyst with the Gemini model
         """

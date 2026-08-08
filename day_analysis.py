@@ -4,7 +4,7 @@ from typing import Any
 from src.models.models import MarketSnapshot, Prediction
 from src.utils.exceptions import MarketDataError, DatabaseConnectionError
 from src.utils.logger import get_logger
-from src.core_logic.llm_engine import MarketAnalysisAgent
+from src.core_logic.llm_engine import MarketAnalystAgent
 from src.config import WATCHLIST, REPORT_FILE_PREFIX
 from src.adapters.market_provider import MarketProvider
 from src.adapters.repository import MarketRepository
@@ -26,7 +26,7 @@ def run_day_analysis() -> None:
 
     try:
         db = MarketRepository()
-        agent = MarketAnalysisAgent()
+        agent = MarketAnalystAgent()
 
         if db.has_run_today():
             logger.info("day analysis has already been run today")

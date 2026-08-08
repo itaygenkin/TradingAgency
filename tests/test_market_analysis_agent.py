@@ -1,5 +1,5 @@
 import unittest
-from src.core_logic.llm_engine import MarketAnalysisAgent
+from src.core_logic.llm_engine import MarketAnalystAgent
 
 
 class TestExtractPredictions(unittest.TestCase):
@@ -11,7 +11,7 @@ Some analysis here...
 DATA_START
 AAPL:Bullish
 DATA_END"""
-        result = MarketAnalysisAgent.extract_predictions(report)
+        result = MarketAnalystAgent.extract_predictions(report)
         self.assertEqual(result, {"AAPL": "Bullish"})
 
     def test_extract_multiple_predictions(self):
@@ -23,7 +23,7 @@ AAPL:Bullish
 TSLA:Bearish
 NVDA:Neutral
 DATA_END"""
-        result = MarketAnalysisAgent.extract_predictions(report)
+        result = MarketAnalystAgent.extract_predictions(report)
         expected = {"AAPL": "Bullish", "TSLA": "Bearish", "NVDA": "Neutral"}
         self.assertEqual(result, expected)
 
@@ -33,7 +33,7 @@ AAPL : Bullish
 TSLA:  Bearish  
 NVDA  :Neutral
 DATA_END"""
-        result = MarketAnalysisAgent.extract_predictions(report)
+        result = MarketAnalystAgent.extract_predictions(report)
         expected = {"AAPL": "Bullish", "TSLA": "Bearish", "NVDA": "Neutral"}
         self.assertEqual(result, expected)
 
@@ -42,13 +42,13 @@ DATA_END"""
         report = """Some analysis...
 DATA_START
 DATA_END"""
-        result = MarketAnalysisAgent.extract_predictions(report)
+        result = MarketAnalystAgent.extract_predictions(report)
         self.assertEqual(result, {})
 
     def test_extract_predictions_no_data_block(self):
         """Test handling when no data block is present"""
         report = "Just a regular report without any data block."
-        result = MarketAnalysisAgent.extract_predictions(report)
+        result = MarketAnalystAgent.extract_predictions(report)
         self.assertEqual(result, {})
 
     def test_extract_predictions_malformed_lines(self):
@@ -57,7 +57,7 @@ AAPL:Bullish
 INVALID_LINE
 TSLA:Bearish
 DATA_END"""
-        result = MarketAnalysisAgent.extract_predictions(report)
+        result = MarketAnalystAgent.extract_predictions(report)
         expected = {"AAPL": "Bullish", "TSLA": "Bearish"}
         self.assertEqual(result, expected)
 
@@ -78,7 +78,7 @@ AAPL:Bullish
 TSLA:Bearish
 GOOGL:Neutral
 DATA_END"""
-        result = MarketAnalysisAgent.extract_predictions(report)
+        result = MarketAnalystAgent.extract_predictions(report)
         expected = {"AAPL": "Bullish", "TSLA": "Bearish", "GOOGL": "Neutral"}
         self.assertEqual(result, expected)
 
@@ -89,7 +89,7 @@ aapl:bullish
 TSLA:BEARISH
 NvDa:NeUtRaL
 DATA_END"""
-        result = MarketAnalysisAgent.extract_predictions(report)
+        result = MarketAnalystAgent.extract_predictions(report)
         expected = {"aapl": "bullish", "TSLA": "BEARISH", "NvDa": "NeUtRaL"}
         self.assertEqual(result, expected)
 
@@ -100,16 +100,16 @@ AAPL:Bullish:Extra
 TSLA:Bearish
 DATA_END"""
         expected_result = {"AAPL": "Bullish", "TSLA": "Bearish"}
-        result = MarketAnalysisAgent.extract_predictions(report)
+        result = MarketAnalystAgent.extract_predictions(report)
         self.assertEqual(result, expected_result)
 
     def test_extract_predictions_empty_string(self):
-        result = MarketAnalysisAgent.extract_predictions("")
+        result = MarketAnalystAgent.extract_predictions("")
         self.assertEqual(result, {})
 
     def test_extract_predictions_only_data_markers(self):
         report = "DATA_START\nDATA_END"
-        result = MarketAnalysisAgent.extract_predictions(report)
+        result = MarketAnalystAgent.extract_predictions(report)
         self.assertEqual(result, {})
 
     def test_extract_predictions_annoying_data(self):
@@ -120,7 +120,7 @@ TSLA:BEARISH\n\n
 NVDA::Bearish
 DATA_END"""
         expected_result = {"AAPL": "Neutral", "TSLA": "BEARISH", "NVDA": "Bearish"}
-        result = MarketAnalysisAgent.extract_predictions(report)
+        result = MarketAnalystAgent.extract_predictions(report)
         self.assertEqual(result, expected_result)
 
 

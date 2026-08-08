@@ -1,35 +1,24 @@
-import os
 import re
+from typing import Any
 
-from dotenv import load_dotenv
-from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_core.language_models import BaseChatModel
 
-from src.config import MODEL_NAME, AGENT_ROLE, TEMPERATURE
+from src.config import AGENT_ROLE
+from src.adapters.llm_factory import get_analysis_model
 from src.models.models import MarketSnapshot
+from src.utils.exceptions import MarketDataError
 from src.utils.logger import get_logger
 
 logger = get_logger("market_agent")
-load_dotenv()
 
 class MarketAnalystAgent:
     def __init__(self, llm: BaseChatModel = None):
         """
         initializes the AI Analyst with the Gemini model
         """
-        api_key = os.getenv("GOOGLE_API_KEY", "")
-        if not api_key:
-            raise ValueError("GOOGLE_API_KEY not found in environment variables.")
+        self.llm = llm or get_analysis_model()
 
-        self.llm: ChatGoogleGenerativeAI = ChatGoogleGenerativeAI(
-            model=MODEL_NAME,
-            google_api_key=api_key,
-            temperature=TEMPERATURE
-        )
-
-    def get_current_llm_model(self) -> str:
-        return self.llm.model
-
-    def analyze_market_data(self, market_data: list[MarketSnapshot], news_data: dict[str, str]) -> str:
+    def analyze_market_data(self, market_data: list[MarketSnapshot], news_data: dict[str, str]) -> tuple[str, Any]:
         """
         Synthesizes price data and news into a professional trading report.
         :param market_data: the dictionary returned by get_premarket_data.
@@ -66,10 +55,13 @@ class MarketAnalystAgent:
         )
 
         response = self.llm.invoke(prompt)
-        if response and "text" in response.content[0]:
-            return response.content[0]["text"]
+        try:
+            content = response.content[0].get("text")
+            used_model = response.response_metadata.get("model", "Unknown")
+        except (KeyError, IndexError):
+            raise MarketDataError("couldn't parse or invoke market data analysis from LLM response")
 
-        return "Error while analyzing market data."
+        return content, used_model
 
     @staticmethod
     def extract_predictions(full_report: str) -> dict[str, str]:

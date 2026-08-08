@@ -37,10 +37,10 @@ def run_day_analysis() -> None:
         news_data: dict[str, Any] = MarketProvider.get_stock_news_for_watchlist(WATCHLIST)
 
         logger.info("step 2: sending data to agent for analysis and creating report")
-        report = agent.analyze_market_data(market_data, news_data)
+        report, used_model = agent.analyze_market_data(market_data, news_data)
 
         logger.info("step 3: extracting predictions from report")
-        predictions_dict = agent.extract_predictions(report)  # TODO: verify it runs properly
+        predictions_dict = agent.extract_predictions(report)
 
         logger.info("step 4: clean and save report to file")
         report = clean_report(report)
@@ -52,8 +52,7 @@ def run_day_analysis() -> None:
             snapshot.report_path = report_path
 
         logger.info("step 5: inserting report into database")
-        llm_model = agent.get_current_llm_model()
-        predictions = [Prediction.convert_snapshot_to_prediction(snapshot, llm_model) for snapshot in market_data]
+        predictions = [Prediction.convert_snapshot_to_prediction(snapshot, used_model) for snapshot in market_data]
         db.bulk_insert_morning_predictions(predictions)
 
     except DatabaseConnectionError as e:

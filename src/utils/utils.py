@@ -3,6 +3,7 @@ import os
 from typing import Any
 
 from src.config import REPORTS_DIR, REPORT_FILE_EXTENSION
+from src.models.models import MarketSnapshot
 from src.models.result import Result
 
 
@@ -43,3 +44,10 @@ def zip_prediction_and_actual_market_data(pending_predictions: dict[str, Any],
                 zipped_data.append((prediction, actual_result.value))
 
     return zipped_data
+
+def update_market_data_prediction_and_report_path(market_data: list[MarketSnapshot],
+                                                  predictions_dict: dict[str, str],
+                                                  report_path: str) -> None:
+    for snapshot in market_data:
+        snapshot.prediction = predictions_dict.get(snapshot.ticker, "Neutral")
+        snapshot.report_path = report_path

@@ -8,7 +8,8 @@ from src.core_logic.llm_engine import MarketAnalystAgent
 from src.config import WATCHLIST, REPORT_FILE_PREFIX
 from src.adapters.market_provider import MarketProvider
 from src.adapters.repository import MarketRepository
-from src.utils.utils import ensure_directories, save_report_to_file, clean_report
+from src.utils.utils import ensure_directories, save_report_to_file, clean_report, \
+    update_market_data_prediction_and_report_path
 
 logger = get_logger("day_analysis")
 
@@ -47,9 +48,7 @@ def run_day_analysis() -> None:
         report_path: str = save_report_to_file(report_name=REPORT_FILE_PREFIX, report_content=report)
 
         logger.info("preparing data to insert into database")
-        for snapshot in market_data:
-            snapshot.prediction = predictions_dict.get(snapshot.ticker, "Neutral")
-            snapshot.report_path = report_path
+        update_market_data_prediction_and_report_path(market_data, predictions_dict, report_path)
 
         logger.info("step 5: inserting report into database")
         predictions = [Prediction.convert_snapshot_to_prediction(snapshot, used_model) for snapshot in market_data]

@@ -1,6 +1,10 @@
 import sys
+from datetime import datetime, time
 from typing import Any
 
+import pytz
+
+from src.adapters.celery_app import validate_single_prediction_task
 from src.models.models import MarketSnapshot, Prediction
 from src.utils.exceptions import MarketDataError, DatabaseConnectionError
 from src.utils.logger import get_logger
@@ -19,6 +23,24 @@ def preliminary_conditions() -> None:
         exit()
 
     ensure_directories()
+
+
+def schedule_night_audits(predictions: list[Prediction]) -> None:
+    """schedule Celery validation tasks for each stock prediction ro run at US market close"""
+    ny_tz = pytz.timezone("US/Eastern")
+    now_ny = datetime.now(ny_tz)
+
+    # define US market close time today
+    market_close_time = ny_tz.localize(datetime.combine(now_ny.date(), time(16, 5)))
+    eta_utc = market_close_time.astimezone(pytz.utc)
+
+    for pred in predictions:
+        # launch a Celery task for each prediction to run at market close
+        validate_single_prediction_task.apply_async(
+            args=[pred],
+            eta=eta_utc,
+        )
+        logger.info(f"scheduled audit task for {pred.ticker} at {market_close_time} NY time")
 
 
 def run_day_analysis() -> None:
@@ -53,6 +75,9 @@ def run_day_analysis() -> None:
         logger.info("step 5: inserting report into database")
         predictions = [Prediction.convert_snapshot_to_prediction(snapshot, used_model) for snapshot in market_data]
         db.bulk_insert_morning_predictions(predictions)
+
+        logger.info(f"step 6: scheduling night audits for {len(predictions)} predictions")
+        schedule_night_audits(predictions)
 
     except DatabaseConnectionError as e:
         logger.error(f"DATABASE CONNECTION ERROR: {e}")

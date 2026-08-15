@@ -1,4 +1,5 @@
 import sys
+from dataclasses import asdict
 from datetime import datetime, time
 from typing import Any
 
@@ -37,7 +38,7 @@ def schedule_night_audits(predictions: list[Prediction]) -> None:
     for pred in predictions:
         # launch a Celery task for each prediction to run at market close
         validate_single_prediction_task.apply_async(
-            args=[pred],
+            args=[asdict(pred)],
             eta=eta_utc,
         )
         logger.info(f"scheduled audit task for {pred.ticker} at {market_close_time} NY time")

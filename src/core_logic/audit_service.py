@@ -55,8 +55,8 @@ class PerformanceValidator:
             logger.error(f"failed to evaluate performance for {ticker}: {e}")
             # default fallback in case of llm error
             return Result(status=ResultStatus.FAILURE,
-                                    msg="Failed to evaluate performance",
-                                    value=None)
+                          msg="Failed to evaluate performance",
+                          value=None)
 
     @staticmethod
     def extract_text(response_content: Any) -> Optional[str]:

@@ -15,7 +15,12 @@ class Result(Generic[T]):
     value: T
     msg: Optional[str] = None
 
+    def __post_init__(self):
+        if self.status != ResultStatus.SUCCESS:
+            assert self.msg is not None, "Error message is required for failed results"
+
     def is_success(self) -> bool:
+        assert self.value is not None
         return self.status == ResultStatus.SUCCESS
 
 

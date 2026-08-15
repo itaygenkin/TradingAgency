@@ -3,7 +3,7 @@ import os
 from typing import Any
 
 from src.config import REPORTS_DIR, REPORT_FILE_EXTENSION
-from src.models.models import MarketSnapshot
+from src.models.models import MarketSnapshot, Prediction
 from src.models.result import Result
 
 
@@ -29,8 +29,8 @@ def clean_report(report: str) -> str:
     return report.replace("$", "\\$")
 
 
-def zip_prediction_and_actual_market_data(pending_predictions: dict[str, Any],
-                                          actual_market_data_result_list: list[Result]) -> list[tuple[Any, Any]]:
+def zip_prediction_and_actual_market_data(pending_predictions: dict[str, Prediction],
+                                          actual_market_data_result_list: list[Result]) -> list[tuple[Prediction, Any]]:
     """
     Zips pending predictions with actual market data where the actual data is successful
     and a corresponding prediction exists.
@@ -39,11 +39,10 @@ def zip_prediction_and_actual_market_data(pending_predictions: dict[str, Any],
     for actual_result in actual_market_data_result_list:
         if actual_result.is_success():
             ticker = actual_result.value.ticker
-            prediction = pending_predictions.get(ticker)
-            if prediction:
-                zipped_data.append((prediction, actual_result.value))
-
+            if pending_predictions.get(ticker):
+                zipped_data.append((pending_predictions[ticker], actual_result.value))
     return zipped_data
+
 
 def update_market_data_prediction_and_report_path(market_data: list[MarketSnapshot],
                                                   predictions_dict: dict[str, str],

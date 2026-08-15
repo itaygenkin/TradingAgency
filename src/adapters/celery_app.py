@@ -4,6 +4,7 @@ from celery import Celery
 from src.adapters.market_provider import MarketProvider
 from src.adapters.repository import MarketRepository
 from src.core_logic.audit_service import PerformanceValidator
+from src.models.models import Prediction
 from src.utils.logger import get_logger
 
 logger = get_logger("CeleryTasks")
@@ -27,8 +28,8 @@ celery_app.conf.update(
 
 
 @celery_app.task(name="tasks.validate_single_prediction", bind=True, max_retries=3)
-def validate_single_prediction_task(self, prediction_row: dict):
-    ticker  = prediction_row.get("ticker")
+def validate_single_prediction_task(self, prediction: Prediction):
+    ticker  = prediction.ticker
     logger.info(f"[Celery] starting EOD validation task for {ticker}")
 
     try:
@@ -40,7 +41,7 @@ def validate_single_prediction_task(self, prediction_row: dict):
         actual_data = market_results[0].value
 
         validator = PerformanceValidator()
-        evaluation = validator.evaluate(prediction_row, actual_data)
+        evaluation = validator.evaluate(prediction, actual_data)
 
         if evaluation.is_success():
             db = MarketRepository()

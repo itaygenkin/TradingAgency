@@ -100,8 +100,7 @@ class MarketRepository:
             logger.error(f"failed to update {len(update_data_list)} audit records. {e}")
             raise
 
-    def get_pending_predictions(self) -> dict[str, Any]:
-        # TODO: can the return value be one of the model
+    def get_pending_predictions(self) -> dict[str, Prediction]:
         query = f"""
             SELECT ticker, pre_market_price, prev_close_price, predicted_move
             FROM {self._table_name}
@@ -114,7 +113,7 @@ class MarketRepository:
                     results = rd_cur.fetchall()
 
                     # convert RealDictRow objects to standard dictionaries for cleaner precessing
-                    predictions = {str(row.get("ticker")): dict(row) for row in results if row.get("ticker")}
+                    predictions = {str(row.get("ticker")): Prediction(**row) for row in results if row.get("ticker")}
 
                     logger.info(f"retrieved {len(predictions)} pending predictions for audit")
                     return predictions

@@ -128,9 +128,7 @@ class MarketProvider:
                     results.append(Result(status=ResultStatus.SUCCESS, value=stock_performance))
                     logger.info(f"validated {ticker}: open ${open_price}, Close ${current_price}")
                 else:
-                    results.append(Result(status=ResultStatus.FAILURE,
-                                          value=None,
-                                          msg=f"no historical data found for {ticker}"))
+                    results.append(Result(status=ResultStatus.FAILURE, msg=f"no historical data found for {ticker}"))
                     logger.warning(f"no intraday data for {ticker} validation")
 
             except Exception as e:

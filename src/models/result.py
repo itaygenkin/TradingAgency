@@ -12,7 +12,7 @@ class ResultStatus(Enum):
 @dataclass
 class Result(Generic[T]):
     status: ResultStatus
-    value: T
+    value: T = None
     msg: Optional[str] = None
 
     def __post_init__(self):

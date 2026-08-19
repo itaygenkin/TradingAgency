@@ -14,7 +14,7 @@ class PerformanceValidator:
     def __init__(self):
         self.agent = MarketAnalystAgent()
 
-    def evaluate(self, prediction: Prediction, actual_data: MarketPerformance) -> Result[Optional[EvaluationValue]]:
+    def evaluate(self, prediction: Prediction, actual_data: MarketPerformance) -> Result[EvaluationValue]:
         """
         compares morning predictions with evening reality using the LLM
         :param prediction: Prediction object containing ticker and predicted_move
@@ -54,9 +54,7 @@ class PerformanceValidator:
         except Exception as e:
             logger.error(f"failed to evaluate performance for {ticker}: {e}")
             # default fallback in case of llm error
-            return Result(status=ResultStatus.FAILURE,
-                          msg="Failed to evaluate performance",
-                          value=None)
+            return Result(status=ResultStatus.FAILURE, msg="Failed to evaluate performance")
 
     @staticmethod
     def extract_text(response_content: Any) -> Optional[str]:

@@ -5,7 +5,7 @@ from typing import Any
 
 import pytz
 
-from src.adapters.celery_app import validate_single_prediction_task
+from src.adapters.celery_app import validate_single_prediction_task, celery_app
 from src.models.models import MarketSnapshot, Prediction
 from src.utils.exceptions import MarketDataError, DatabaseConnectionError
 from src.utils.logger import get_logger
@@ -24,6 +24,15 @@ def preliminary_conditions() -> None:
         exit()
 
     ensure_directories()
+
+    # Verify Celery app is running
+    try:
+        if not celery_app.control.ping(timeout=1):
+            logger.error("Celery workers are not running. Cannot schedule night audits.")
+            sys.exit(1)
+    except Exception as e:
+        logger.error(f"Failed to connect to Celery: {e}")
+        sys.exit(1)
 
 
 def schedule_night_audits(predictions: list[Prediction]) -> None:
@@ -95,4 +104,3 @@ def run_day_analysis() -> None:
 
 if __name__ == "__main__":
     run_day_analysis()
-

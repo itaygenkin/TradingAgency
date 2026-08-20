@@ -91,7 +91,7 @@ class MarketProvider:
             return Result(status=ResultStatus.SUCCESS, value=search_results)
         except Exception as e:
             logger.error(f"search failed for {ticker}: {str(e)}")
-            return Result(status=ResultStatus.FAILURE, msg="No recent news found.", value=None)
+            return Result(status=ResultStatus.FAILURE, msg="No recent news found.")
 
     @staticmethod
     def get_stock_news_for_watchlist(tickers: list[str]) -> dict[str, str]:
@@ -113,6 +113,7 @@ class MarketProvider:
             try:
                 stock = yf.Ticker(ticker)
                 df: pd.DataFrame = stock.history(period="1d", interval="1m")
+                logger.debug(f"fetched {len(df)} rows of intraday data for {ticker}. Stock history columns: {df.columns.tolist()}")
 
                 if not df.empty:
                     open_price: float = round(float(df["Open"].iloc[0]), 2)
@@ -126,7 +127,7 @@ class MarketProvider:
                         actual_change_pct=day_change_pct,
                     )
                     results.append(Result(status=ResultStatus.SUCCESS, value=stock_performance))
-                    logger.info(f"validated {ticker}: open ${open_price}, Close ${current_price}")
+                    logger.info(f"validated {ticker}: open ${open_price}, close ${current_price}")
                 else:
                     results.append(Result(status=ResultStatus.FAILURE, msg=f"no historical data found for {ticker}"))
                     logger.warning(f"no intraday data for {ticker} validation")

@@ -1,6 +1,8 @@
 from dataclasses import asdict
+from unittest.mock import patch
 
 import pytest
+from celery.exceptions import Retry
 
 from src.adapters.llm_factory import get_analysis_model
 from src.adapters.repository import MarketRepository
@@ -105,3 +107,14 @@ class TestTradingPipelineIntegration:
 
         # cleanup test record from database
         # optional: add a db.delete_test_ticker("TEST_AAPLE") helper if exists
+
+    @patch("src.adapters.celery_app.validate_single_prediction_task.retry", side_effect=Retry())
+    @patch("src.adapters.celery_app.MarketProvider.get_actual_market_performance_for_single_ticker")
+    def test_validate_prediction_retry_on_empty_data(self, mock_get_performance, mock_retry, sample_prediction):
+        mock_get_performance.side_effect = ValueError("no market data")
+
+        with pytest.raises(Retry):
+            validate_single_prediction_task(sample_prediction)
+
+        mock_get_performance.assert_called_once_with(sample_prediction.ticker)
+        mock_retry.assert_called_once()

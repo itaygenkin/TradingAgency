@@ -1,5 +1,6 @@
 import os
 from celery import Celery
+from celery.exceptions import Retry
 
 from src.adapters.market_provider import MarketProvider
 from src.adapters.repository import MarketRepository
@@ -9,7 +10,7 @@ from src.utils.logger import get_logger
 
 logger = get_logger("CeleryTasks")
 
-CELERY_COUNTDOWN = 90  # time in seconds
+CELERY_COUNTDOWN = 600  # time in seconds
 REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
 
 celery_app = Celery(
@@ -29,16 +30,17 @@ celery_app.conf.update(
 
 @celery_app.task(name="tasks.validate_single_prediction", bind=True, max_retries=3)
 def validate_single_prediction_task(self, prediction: Prediction):
+    # TODO: Confirm whether Celery should receive a Prediction instance or a serialized dict payload.
     ticker  = prediction.ticker
     logger.info(f"[Celery] starting EOD validation task for {ticker}")
 
     try:
-        market_results = MarketProvider.get_actual_market_performance([ticker])
-        if not market_results or not market_results[0].is_success():
+        market_results = MarketProvider.get_actual_market_performance_for_single_ticker(ticker)
+        if not market_results or not market_results.is_success():
             logger.warning(f"[Celery] could not fetch EOD market data for {ticker}")
             return
 
-        actual_data = market_results[0].value
+        actual_data = market_results.value
 
         validator = PerformanceValidator()
         evaluation = validator.evaluate(prediction, actual_data)

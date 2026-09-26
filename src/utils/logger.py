@@ -13,13 +13,13 @@ class CustomFormatter(logging.Formatter):
         return super().format(record)
 
 
-def get_logger(service_name: str, log_file: str = "app.log") -> logging.Logger:
+def get_logger(service_name: str, log_file: str = "app.log", debug_level: int = logging.INFO) -> logging.Logger:
     logger = logging.getLogger(service_name)
 
     if logger.hasHandlers():
         return logger
 
-    logger.setLevel(logging.INFO)
+    logger.setLevel(debug_level)
 
     log_format: str = "[%(asctime)s] [%(name)s] [%(levelname)s] - %(filename)s.%(funcName)s.%(lineno)d:  %(message)s"
     date_format: str = "%Y-%m-%d %H:%M:%S"

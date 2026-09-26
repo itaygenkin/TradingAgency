@@ -2,7 +2,7 @@ from typing import Any, Optional
 
 from src.core_logic.llm_engine import MarketAnalystAgent
 from src.config import VALIDATION_LOG_FILE
-from src.models.models import MarketPerformance
+from src.models.models import MarketPerformance, Prediction
 from src.models.result import EvaluationValue, Result, ResultStatus
 from src.utils.logger import get_logger
 
@@ -14,19 +14,19 @@ class PerformanceValidator:
     def __init__(self):
         self.agent = MarketAnalystAgent()
 
-    def evaluate(self, prediction_row: dict, actual_data: MarketPerformance) -> Result[EvaluationValue]:
+    def evaluate(self, prediction: Prediction, actual_data: MarketPerformance) -> Result[EvaluationValue]:
         """
         compares morning predictions with evening reality using the LLM
-        :param prediction_row: dictionary containing ticker, predicted_move, etc.
-        :param actual_data: dictionary containing open, close, and actual_change_pct.
+        :param prediction: Prediction object containing ticker and predicted_move
+        :param actual_data: MarketPerformance object containing market data
         :return: a tuple of (is_correct: bool, score: int).
         """
-        ticker = prediction_row.get("ticker")
+        ticker = prediction.ticker
         logger.info(f"evaluating performance for {ticker}")
 
         prompt = (
             f"Review the following trading prediction for {ticker}:\n"
-            f"- Predicted Move: {prediction_row.get("predicted_move")}\n"
+            f"- Predicted Move: {prediction.predicted_move}\n"
             f"- Actual Market Open Price: ${actual_data.open}\n"
             f"- Actual Price Change during session: {actual_data.actual_change_pct}%\n\n"
             f"Criteria:\n"
@@ -54,9 +54,7 @@ class PerformanceValidator:
         except Exception as e:
             logger.error(f"failed to evaluate performance for {ticker}: {e}")
             # default fallback in case of llm error
-            return Result(status=ResultStatus.FAILURE,
-                                    msg="Failed to evaluate performance",
-                                    value=None)
+            return Result(status=ResultStatus.FAILURE, msg="Failed to evaluate performance")
 
     @staticmethod
     def extract_text(response_content: Any) -> Optional[str]:

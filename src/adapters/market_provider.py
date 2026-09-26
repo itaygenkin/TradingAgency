@@ -8,12 +8,13 @@ import yfinance as yf
 import pandas as pd
 from langchain_community.tools import DuckDuckGoSearchRun
 
+from src.adapters import celery_app
 from src.models.models import MarketSnapshot, MarketPerformance
 from src.models.result import Result, ResultStatus
 from src.utils.exceptions import MarketDataError
 from src.utils.logger import get_logger
 
-logger = get_logger("market_tools")
+logger = get_logger("market_tools", debug_level=10)
 
 
 class MarketProvider:
@@ -91,7 +92,7 @@ class MarketProvider:
             return Result(status=ResultStatus.SUCCESS, value=search_results)
         except Exception as e:
             logger.error(f"search failed for {ticker}: {str(e)}")
-            return Result(status=ResultStatus.FAILURE, msg="No recent news found.", value=None)
+            return Result(status=ResultStatus.FAILURE, msg="No recent news found.")
 
     @staticmethod
     def get_stock_news_for_watchlist(tickers: list[str]) -> dict[str, str]:
@@ -105,37 +106,42 @@ class MarketProvider:
         return results
 
     @staticmethod
+    def _build_market_performance_from_yf(ticker: str, df: pd.DataFrame) -> Result[MarketPerformance]:
+        if df is None or df.empty:
+            logger.warning(f"no end-of-day data for {ticker} validation")
+            return Result(status=ResultStatus.FAILURE, msg=f"no historical data found for {ticker}")
+
+        open_price: float = round(float(df["Open"].iloc[0]), 2)
+        current_price: float = round(float(df["Close"].iloc[-1]), 2)
+        day_change_pct: float = round(((current_price - open_price) / open_price) * 100, 2)
+        stock_performance: MarketPerformance = MarketPerformance(
+            ticker=ticker,
+            open=open_price,
+            close=current_price,
+            actual_change_pct=day_change_pct,
+        )
+        return Result(status=ResultStatus.SUCCESS, value=stock_performance)
+
+    @staticmethod
+    def get_actual_market_performance_for_single_ticker(ticker: str) -> Result[MarketPerformance]:
+        stock  = yf.Ticker(ticker)
+        df = stock.history(period="2d", interval="1d")
+        return MarketProvider._build_market_performance_from_yf(ticker, df)
+
+    @staticmethod
     def get_actual_market_performance(tickers: list[str]) -> list[Result[MarketPerformance]]:
         logger.info(f"fetching actual market performance for {len(tickers)} stocks")
 
         results: list[Result[MarketPerformance]] = []
         for ticker in tickers:
             try:
-                stock = yf.Ticker(ticker)
-                df: pd.DataFrame = stock.history(period="1d", interval="1m")
-
-                if not df.empty:
-                    open_price: float = round(float(df["Open"].iloc[0]), 2)
-                    current_price: float = round(float(df["Close"].iloc[-1]), 2)
-                    day_change_pct: float = round(((current_price - open_price) / open_price) * 100, 2)
-
-                    stock_performance: MarketPerformance = MarketPerformance(
-                        ticker=ticker,
-                        open=open_price,
-                        close=current_price,
-                        actual_change_pct=day_change_pct,
-                    )
-                    results.append(Result(status=ResultStatus.SUCCESS, value=stock_performance))
-                    logger.info(f"validated {ticker}: open ${open_price}, Close ${current_price}")
-                else:
-                    results.append(Result(status=ResultStatus.FAILURE,
-                                          value=None,
-                                          msg=f"no historical data found for {ticker}"))
-                    logger.warning(f"no intraday data for {ticker} validation")
-
+                results.append(MarketProvider.get_actual_market_performance_for_single_ticker(ticker))
             except Exception as e:
                 logger.error(f"error validating performance for {ticker}: {str(e)}")
+                raise celery_app.TaskError(f"error validating performance for {ticker}: {str(e)}")
 
+        logger.info(f"completed fetching market performance. {sum(1 for result in results if result.is_success())} "
+                    f"successful, {sum(1 for result in results if not result.is_success())} failed.")
         return results
 
     @staticmethod

@@ -1,5 +1,6 @@
 import unittest
 from src.core_logic.llm_engine import MarketAnalystAgent
+from src.utils.exceptions import MarketDataError
 
 
 class TestExtractPredictions(unittest.TestCase):
@@ -104,8 +105,7 @@ DATA_END"""
         self.assertEqual(result, expected_result)
 
     def test_extract_predictions_empty_string(self):
-        result = MarketAnalystAgent.extract_predictions("")
-        self.assertEqual(result, {})
+        self.assertRaises(MarketDataError, MarketAnalystAgent.extract_predictions, "")
 
     def test_extract_predictions_only_data_markers(self):
         report = "DATA_START\nDATA_END"

@@ -1,5 +1,5 @@
 from dataclasses import astuple
-from typing import Any, Iterable
+from typing import Iterable
 
 import psycopg2
 from psycopg2.extras import RealDictCursor, execute_batch
@@ -100,8 +100,7 @@ class MarketRepository:
             logger.error(f"failed to update {len(update_data_list)} audit records. {e}")
             raise
 
-    def get_pending_predictions(self) -> dict[str, Any]:
-        # TODO: can the return value be one of the model
+    def get_pending_predictions(self) -> dict[str, Prediction]:
         query = f"""
             SELECT ticker, pre_market_price, prev_close_price, predicted_move
             FROM {self._table_name}
@@ -114,7 +113,7 @@ class MarketRepository:
                     results = rd_cur.fetchall()
 
                     # convert RealDictRow objects to standard dictionaries for cleaner precessing
-                    predictions = {str(row.get("ticker")): dict(row) for row in results if row.get("ticker")}
+                    predictions = {str(row.get("ticker")): Prediction(**row) for row in results if row.get("ticker")}
 
                     logger.info(f"retrieved {len(predictions)} pending predictions for audit")
                     return predictions
@@ -137,3 +136,11 @@ class MarketRepository:
         except psycopg2.Error as e:
             logger.error(f"failed to check if pipeline has run today. {e}")
             return False
+
+    def delete_prediction_by_ticker(self, ticker: str) -> None:
+        """removes a specific ticker record (used mainly for test cleanup"""
+        query = f"DELETE FROM {self._table_name} WHERE ticker = %s;"
+        with self._get_connection() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(query, (ticker,))
+                conn.commit()

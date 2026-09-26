@@ -9,7 +9,7 @@ from src.infrastructure.repository import MarketRepository
 from src.application.audit_service import PerformanceValidator
 from src.infrastructure.llm_engine import MarketAnalystAgent
 from src.domain.models import MarketPerformance, Prediction
-from src.adapters.celery_app import validate_single_prediction_task
+from src.application.celery_tasks import validate_single_prediction_task
 
 
 @pytest.fixture(scope="module")

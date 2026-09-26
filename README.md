@@ -23,6 +23,8 @@ An automated end-to-end pipeline that performs pre-market stock analysis using L
 │   │   └── logger.py         
 │   └── config.py           # Environment & Watchlist settings
 ├── tests/
+├── docker-compose.yaml
+├── Dockerfile
 ├── day_analysis.py         # Entry point: Morning Pipeline
 └── night_audit.py          # Entry point: Evening Audit
 ```

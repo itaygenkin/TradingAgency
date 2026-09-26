@@ -37,10 +37,13 @@ An automated end-to-end pipeline that performs pre-market stock analysis using L
 ---
 
 ## Tech Stack
-*   **Language:** Python 3.13+
-*   **AI Engine:** Google Gemini (via LangChain)
-*   **Database:** PostgreSQL 16 (with `psycopg2` for bulk operations)
-*   **Data Sources:** `yfinance` for stock data, `DuckDuckGo` (News catalysts)
+* **Language:** Python 3.13+
+* **Containerization:** Docker & Docker Compose
+* **Task Queue & Message Broker:** Celery & Redis
+* **AI Engine:** Google Gemini (via LangChain)
+* **Database:** PostgreSQL 16
+* **Data Sources & Utils:** `yfinance`, DuckDuckGo (News catalysts), `pandas_market_calendars` (Market hours validation)
+* **Monitoring:** Flower (Celery Workers Dashboard)
 
 ---
 

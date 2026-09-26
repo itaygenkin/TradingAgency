@@ -2,7 +2,7 @@ FROM python:3.11-slim
 
 # set environment variables to optimize python execution in docker
 ENV PYTHONDOWTWRITETYPECODE=1 \
-    PYTHONUNBUFFERED=1 \
+    PYTHONUNBUFFERED=1
 
 WORKDIR /app
 

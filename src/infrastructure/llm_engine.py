@@ -1,18 +1,18 @@
 import re
-from typing import Any
+from typing import Optional
 
 from langchain_core.language_models import BaseChatModel
 
 from src.config import AGENT_ROLE
-from src.adapters.llm_factory import get_analysis_model
-from src.models.models import MarketSnapshot
+from src.infrastructure.llm_factory import get_analysis_model
+from src.domain.models import MarketSnapshot
 from src.utils.exceptions import MarketDataError
 from src.utils.logger import get_logger
 
 logger = get_logger("market_agent")
 
 class MarketAnalystAgent:
-    def __init__(self, llm: BaseChatModel = None):
+    def __init__(self, llm: Optional[BaseChatModel]):
         """
         initializes the AI Analyst with the Gemini model
         """

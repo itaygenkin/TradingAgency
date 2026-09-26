@@ -1,5 +1,5 @@
 import unittest
-from src.core_logic.llm_engine import MarketAnalystAgent
+from src.infrastructure.llm_engine import MarketAnalystAgent
 from src.utils.exceptions import MarketDataError
 
 

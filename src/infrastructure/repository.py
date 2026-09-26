@@ -5,8 +5,9 @@ import psycopg2
 from psycopg2.extras import RealDictCursor, execute_batch
 
 from src.config import DB_CONFIG
-from src.models.models import Prediction
+from src.domain.models import Prediction
 from src.utils.logger import get_logger
+
 logger = get_logger(__name__)
 
 

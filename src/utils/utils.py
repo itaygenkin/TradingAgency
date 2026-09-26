@@ -3,8 +3,8 @@ import os
 from typing import Any
 
 from src.config import REPORTS_DIR, REPORT_FILE_EXTENSION
-from src.models.models import MarketSnapshot, Prediction
-from src.models.result import Result
+from src.domain.models import MarketSnapshot, Prediction
+from src.domain.result import Result
 
 
 def ensure_directories() -> None:

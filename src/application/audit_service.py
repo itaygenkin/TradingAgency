@@ -1,9 +1,9 @@
 from typing import Any, Optional
 
-from src.core_logic.llm_engine import MarketAnalystAgent
+from src.infrastructure.llm_engine import MarketAnalystAgent
 from src.config import VALIDATION_LOG_FILE
-from src.models.models import MarketPerformance, Prediction
-from src.models.result import EvaluationValue, Result, ResultStatus
+from src.domain.models import MarketPerformance, Prediction
+from src.domain.result import EvaluationValue, Result, ResultStatus
 from src.utils.logger import get_logger
 
 

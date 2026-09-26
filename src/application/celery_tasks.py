@@ -1,34 +1,15 @@
-import os
-from celery import Celery
-from celery.exceptions import Retry
-
-from src.adapters.market_provider import MarketProvider
-from src.adapters.repository import MarketRepository
-from src.core_logic.audit_service import PerformanceValidator
-from src.models.models import Prediction
+from entrypoints.celery_app import celery_app
+from entrypoints.celery_app import CELERY_COUNTDOWN
+from src.application.audit_service import PerformanceValidator
+from src.domain.models import Prediction
+from src.infrastructure.market_provider import MarketProvider
+from src.infrastructure.repository import MarketRepository
 from src.utils.logger import get_logger
 
 logger = get_logger("CeleryTasks")
 
-CELERY_COUNTDOWN = 600  # time in seconds
-REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
 
-celery_app = Celery(
-    "validation_tasks",
-    broker=REDIS_URL,
-    backend=REDIS_URL
-)
-
-celery_app.conf.update(
-    task_serializer="json",
-    accept_content=["json"],
-    result_serializer="json",
-    timezone="America/New_York",
-    enable_utc=True,
-)
-
-
-@celery_app.task(name="tasks.validate_single_prediction", bind=True, max_retries=3)
+@celery_app.task(name="celery_tasks.validate_single_prediction", bind=True, max_retries=3)
 def validate_single_prediction_task(self, prediction: Prediction):
     # TODO: Confirm whether Celery should receive a Prediction instance or a serialized dict payload.
     ticker  = prediction.ticker

@@ -15,6 +15,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # install Python dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
+# Flower is a separate project (not included in Celery); install it so the 'flower' CLI is available
+RUN pip install --no-cache-dir flower
 
 # copy the rest of the application code
 COPY . .

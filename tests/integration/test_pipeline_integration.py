@@ -4,11 +4,11 @@ from unittest.mock import patch
 import pytest
 from celery.exceptions import Retry
 
-from src.adapters.llm_factory import get_analysis_model
-from src.adapters.repository import MarketRepository
-from src.core_logic.audit_service import PerformanceValidator
-from src.core_logic.llm_engine import MarketAnalystAgent
-from src.models.models import MarketPerformance, Prediction
+from src.infrastructure.llm_factory import get_analysis_model
+from src.infrastructure.repository import MarketRepository
+from src.application.audit_service import PerformanceValidator
+from src.infrastructure.llm_engine import MarketAnalystAgent
+from src.domain.models import MarketPerformance, Prediction
 from src.adapters.celery_app import validate_single_prediction_task
 
 

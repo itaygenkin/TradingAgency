@@ -1,8 +1,8 @@
 from unittest.mock import patch
 import pandas as pd
 
-from src.adapters.market_provider import MarketProvider
-from src.models.models import MarketSnapshot
+from src.infrastructure.market_provider import MarketProvider
+from src.domain.models import MarketSnapshot
 
 
 def test_market_snapshot_creation():

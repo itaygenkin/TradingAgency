@@ -6,27 +6,33 @@ An automated end-to-end pipeline that performs pre-market stock analysis using L
 ## Project Structure
 ```text
 ├── data/                   # Generated Markdown reports & logs
+├── docker-compose.yaml
+├── Dockerfile
+├── requirements.txt
+├── .env
+├── entrypoints/
+│   ├── day_analysis.py        # Entry point: Trigger morning_pipeline
+│   ├── night_audit.py         # Entry point: Trigger evening_pipeline
+│   └── celery_app.py          # Celery worker/beat instantiation
 ├── src/
-│   ├── core/               # Business Logic
-│   │   ├── llm_engine.py       # LLM report generation & parsing
-│   │   └── audit_service.py    # Performance evaluation logic
-│   ├── adapters/           # External System Interfaces
-│   │   ├── repository.py       # PostgreSQL Repository (Bulk Ops)
-│   │   ├── llm_factory.py      # LLM Factory for managing different Gemini models
-│   │   └── market_provider.py  # yfinance & news fetching
-│   ├── models/             # Data Blueprints
-|   |   |   models.py
-│   │   └── result.py           # Result Data Class
+│   ├── application/
+│   │   ├── morning_pipeline.py     # Day analysis logic (orchestration)
+│   │   └── evening_pipeline.py     # Night audit logic (orchestration)
+│   ├── domain/             # Data Blueprints
+│   │   │   models.py
+│   │   └── result.py               # Result Data Class
+│   ├── infrastructure/     # Framework & Shared Components
+│   │   │   database_adapter.py     # PostgreSQL Adapter
+│   │   │   market_provider.py      # yfinance & DuckDuckGo fetching
+│   │   └── llm_engine.py           # LLM report generation & parsing
 │   ├── utils/              # Shared Helpers
 │   │   ├── exceptions.py     
 │   │   ├── utils.py 
 │   │   └── logger.py         
 │   └── config.py           # Environment & Watchlist settings
-├── tests/
-├── docker-compose.yaml
-├── Dockerfile
-├── day_analysis.py         # Entry point: Morning Pipeline
-└── night_audit.py          # Entry point: Evening Audit
+└── tests/
+    ├── integration/
+    └── unit/
 ```
 ---
 

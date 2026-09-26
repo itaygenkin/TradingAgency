@@ -5,14 +5,15 @@ from typing import Any
 
 import pytz
 
-from src.adapters.celery_app import validate_single_prediction_task, celery_app
-from src.models.models import MarketSnapshot, Prediction
+from src.application.celery_tasks import validate_single_prediction_task
+from entrypoints.celery_app import celery_app
+from src.domain.models import MarketSnapshot, Prediction
 from src.utils.exceptions import MarketDataError, DatabaseConnectionError
 from src.utils.logger import get_logger
-from src.core_logic.llm_engine import MarketAnalystAgent
+from src.infrastructure.llm_engine import MarketAnalystAgent
 from src.config import WATCHLIST, REPORT_FILE_PREFIX
-from src.adapters.market_provider import MarketProvider
-from src.adapters.repository import MarketRepository
+from src.infrastructure.market_provider import MarketProvider
+from src.infrastructure.repository import MarketRepository
 from src.utils.utils import ensure_directories, save_report_to_file, clean_report, \
     update_market_data_prediction_and_report_path
 

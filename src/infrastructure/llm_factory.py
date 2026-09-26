@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 def get_analysis_model() -> BaseChatModel:
     """
     Creates a Runnable LLM pipeline with robust sequential fallbacks. If the primary model fails
-    (Rate-Limit, Quota exhaustion, Server Error), LangChain will seamlessly retry with the backup models.
+    (Rate-Limit, Quota exhaustion, Server Error), LangChain will seamlessly retry with the backup domain.
     """
     models = MODELS
     primary_model = ChatGoogleGenerativeAI(

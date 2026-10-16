@@ -56,5 +56,5 @@ An automated end-to-end pipeline that performs pre-market stock analysis using L
 
 ### Running the Pipelines
 1. Ensure the system is running: `docker-compose up -d` (or `docker-compose start`).
-2. Run the morning pipeline: `python -m entrypoints/day_analysis.py`.
+2. Run the morning pipeline: `python -m entrypoints.day_analysis`.
 3. To stop the pipelines: `docker-compose down`.

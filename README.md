@@ -51,14 +51,10 @@ An automated end-to-end pipeline that performs pre-market stock analysis using L
 1. Clone the repository.
 2. Create a `.env` file from `.env.example` and fill the required API keys and database credentials.
 3. Install all dependencies: `pip install -r requirements.txt`.
-4. Start the infrastructure services: `docker-compose up -d --build`.
-5. Start the Celery worker to handle data processing tasks: `celery -A entrypoints.celery_app worker --loglevel=info`.
-6. Start the Celery beat scheduler to trigger periodic tasks: `celery -A entrypoints.celery_app beat --loglevel=info`.
-7. Launch the Streamlit dashboard: `streamlit run src/application/dashboard.py`. // not implemented yet
+4. Build and start the entire system (Database, Redis, Celery): `docker-compose up -d --build`.
+5. Launch the Streamlit dashboard: `streamlit run src/application/dashboard.py`. // not implemented yet
 
 ### Running the Pipelines
-1. Ensure the infrastructure services are running: `docker-compose start`.
-2. Start the Celery worker (in separate terminal): `celery -A entrypoints.celery_app worker --loglevel=info`.
-3. Start the Celery beat scheduler (in separate terminal): `celery -A entrypoints.celery_app beat --loglevel=info`.
-4. Run the morning pipeline: `python -m entrypoints/day_analysis.py`.
-5. To stop the pipelines, you can either stop the Celery worker and beat processes or use `docker-compose down` to stop all services.
+1. Ensure the system is running: `docker-compose up -d` (or `docker-compose start`).
+2. Run the morning pipeline: `python -m entrypoints/day_analysis.py`.
+3. To stop the pipelines: `docker-compose down`.

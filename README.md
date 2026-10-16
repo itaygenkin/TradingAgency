@@ -61,3 +61,4 @@ An automated end-to-end pipeline that performs pre-market stock analysis using L
 2. Start the Celery worker (in separate terminal): `celery -A entrypoints.celery_app worker --loglevel=info`.
 3. Start the Celery beat scheduler (in separate terminal): `celery -A entrypoints.celery_app beat --loglevel=info`.
 4. Run the morning pipeline: `python -m entrypoints/day_analysis.py`.
+5. To stop the pipelines, you can either stop the Celery worker and beat processes or use `docker-compose down` to stop all services.

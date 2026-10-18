@@ -2,9 +2,9 @@ from datetime import datetime
 import os
 from typing import Any
 
-from src.config import REPORTS_DIR, REPORT_FILE_EXTENSION
-from src.domain.models import MarketSnapshot, Prediction
-from src.domain.result import Result
+from src.trading_agency.config import REPORTS_DIR, REPORT_FILE_EXTENSION
+from src.trading_agency.domain.models import MarketSnapshot, Prediction
+from src.trading_agency.domain.result import Result
 
 
 def ensure_directories() -> None:

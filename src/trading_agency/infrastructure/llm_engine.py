@@ -3,11 +3,11 @@ from typing import Optional
 
 from langchain_core.language_models import BaseChatModel
 
-from src.config import AGENT_ROLE
-from src.infrastructure.llm_factory import get_analysis_model
-from src.domain.models import MarketSnapshot
-from src.utils.exceptions import MarketDataError
-from src.utils.logger import get_logger
+from src.trading_agency.config import AGENT_ROLE
+from src.trading_agency.infrastructure.llm_factory import get_analysis_model
+from src.trading_agency.domain.models import MarketSnapshot
+from src.trading_agency.utils.exceptions import MarketDataError
+from src.trading_agency.utils.logger import get_logger
 
 logger = get_logger("market_agent")
 

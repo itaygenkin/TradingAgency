@@ -4,7 +4,7 @@ import os
 from langchain_core.language_models import BaseLanguageModel, BaseChatModel
 from langchain_google_genai import ChatGoogleGenerativeAI
 
-from src.config import TEMPERATURE, MODELS
+from src.trading_agency.config import TEMPERATURE, MODELS
 
 logger = logging.getLogger(__name__)
 

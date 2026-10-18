@@ -4,12 +4,12 @@ from unittest.mock import patch
 import pytest
 from celery.exceptions import Retry
 
-from src.infrastructure.llm_factory import get_analysis_model
-from src.infrastructure.repository import MarketRepository
-from src.application.audit_service import PerformanceValidator
-from src.infrastructure.llm_engine import MarketAnalystAgent
-from src.domain.models import MarketPerformance, Prediction
-from src.application.celery_tasks import validate_single_prediction_task
+from src.trading_agency.infrastructure.llm_factory import get_analysis_model
+from src.trading_agency.infrastructure.repository import MarketRepository
+from src.trading_agency.application.audit_service import PerformanceValidator
+from src.trading_agency.infrastructure.llm_engine import MarketAnalystAgent
+from src.trading_agency.domain.models import MarketPerformance, Prediction
+from src.trading_agency.application.celery_tasks import validate_single_prediction_task
 
 
 @pytest.fixture(scope="module")
@@ -108,8 +108,11 @@ class TestTradingPipelineIntegration:
         # cleanup test record from database
         # optional: add a db.delete_test_ticker("TEST_AAPLE") helper if exists
 
-    @patch("src.adapters.celery_app.validate_single_prediction_task.retry", side_effect=Retry())
-    @patch("src.adapters.celery_app.MarketProvider.get_actual_market_performance_for_single_ticker")
+    @patch(
+        "src.trading_agency.application.celery_tasks.validate_single_prediction_task.retry", side_effect=Retry())
+    @patch(
+        "src.trading_agency.application.celery_tasks.MarketProvider.get_actual_market_performance_for_single_ticker"
+    )
     def test_validate_prediction_retry_on_empty_data(self, mock_get_performance, mock_retry, sample_prediction):
         mock_get_performance.side_effect = ValueError("no market data")
 

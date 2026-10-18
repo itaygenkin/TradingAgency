@@ -2,7 +2,7 @@ import logging
 import os
 import sys
 
-from src.config import LOGS_DIR
+from src.trading_agency.config import LOGS_DIR
 
 
 class CustomFormatter(logging.Formatter):

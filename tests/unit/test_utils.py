@@ -1,5 +1,5 @@
 import unittest
-from src.utils.utils import clean_report
+from src.trading_agency.utils.utils import clean_report
 
 
 class TestCleanReport(unittest.TestCase):

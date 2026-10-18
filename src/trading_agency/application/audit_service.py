@@ -1,10 +1,10 @@
 from typing import Any, Optional
 
-from src.infrastructure.llm_engine import MarketAnalystAgent
-from src.config import VALIDATION_LOG_FILE
-from src.domain.models import MarketPerformance, Prediction
-from src.domain.result import EvaluationValue, Result, ResultStatus
-from src.utils.logger import get_logger
+from src.trading_agency.domain.models import Prediction, MarketPerformance
+from src.trading_agency.domain.result import Result, EvaluationValue, ResultStatus
+from src.trading_agency.infrastructure.llm_engine import MarketAnalystAgent
+from src.trading_agency.config import VALIDATION_LOG_FILE
+from src.trading_agency.utils.logger import get_logger
 
 
 logger = get_logger("ValidationService", log_file=VALIDATION_LOG_FILE)

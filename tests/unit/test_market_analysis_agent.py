@@ -1,6 +1,6 @@
 import unittest
-from src.infrastructure.llm_engine import MarketAnalystAgent
-from src.utils.exceptions import MarketDataError
+from src.trading_agency.infrastructure.llm_engine import MarketAnalystAgent
+from src.trading_agency.utils.exceptions import MarketDataError
 
 
 class TestExtractPredictions(unittest.TestCase):

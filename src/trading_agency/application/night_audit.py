@@ -1,11 +1,12 @@
-from src.domain.result import Result, EvaluationValue
-from src.utils.logger import get_logger
-from src.application.audit_service import PerformanceValidator
-from src.infrastructure.market_provider import MarketProvider
-from src.infrastructure.repository import MarketRepository
-from src.utils.utils import zip_prediction_and_actual_market_data
+from src.trading_agency.application.audit_service import PerformanceValidator
+from src.trading_agency.domain.result import EvaluationValue, Result
+from src.trading_agency.infrastructure.market_provider import MarketProvider
+from src.trading_agency.infrastructure.repository import MarketRepository
+from src.trading_agency.utils.logger import get_logger
+from src.trading_agency.utils.utils import zip_prediction_and_actual_market_data
 
 logger = get_logger("ValidationMain")
+
 
 def run_night_audit() -> None:
     logger.info("starting Night Audit pipeline")

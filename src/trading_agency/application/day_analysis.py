@@ -1,39 +1,42 @@
-import sys
 from dataclasses import asdict
 from datetime import datetime, time
+import sys
 from typing import Any
+
+from psycopg2 import OperationalError
 
 import pytz
 
-from src.application.celery_tasks import validate_single_prediction_task
-from entrypoints.celery_app import celery_app
-from src.domain.models import MarketSnapshot, Prediction
-from src.utils.exceptions import MarketDataError, DatabaseConnectionError
-from src.utils.logger import get_logger
-from src.infrastructure.llm_engine import MarketAnalystAgent
-from src.config import WATCHLIST, REPORT_FILE_PREFIX
-from src.infrastructure.market_provider import MarketProvider
-from src.infrastructure.repository import MarketRepository
-from src.utils.utils import ensure_directories, save_report_to_file, clean_report, \
-    update_market_data_prediction_and_report_path
+from src.trading_agency.application.celery_tasks import validate_single_prediction_task
+from src.trading_agency.celery_app import celery_app
+from src.trading_agency.domain.models import MarketSnapshot, Prediction
+from src.trading_agency.config import WATCHLIST, REPORT_FILE_PREFIX
+from src.trading_agency.infrastructure.llm_engine import MarketAnalystAgent
+from src.trading_agency.infrastructure.market_provider import MarketProvider
+from src.trading_agency.infrastructure.repository import MarketRepository
+from src.trading_agency.utils.exceptions import DatabaseConnectionError, MarketDataError
+from src.trading_agency.utils.logger import get_logger
+from src.trading_agency.utils.utils import (
+    clean_report,
+    ensure_directories,
+    save_report_to_file,
+    update_market_data_prediction_and_report_path,
+)
 
 logger = get_logger("day_analysis")
 
 
-def preliminary_conditions() -> None:
+def preliminary_conditions() -> bool:
     if not MarketProvider.is_market_open_today():
         exit()
 
     ensure_directories()
 
-    # Verify Celery app is running
+    # Skip task scheduling when Celery is unavailable in local development.
     try:
-        if not celery_app.control.ping(timeout=1):
-            logger.error("Celery workers are not running. Cannot schedule night audits.")
-            sys.exit(1)
-    except Exception as e:
-        logger.error(f"Failed to connect to Celery: {e}")
-        sys.exit(1)
+        return bool(celery_app.control.ping(timeout=1))
+    except Exception:
+        return False
 
 
 def schedule_night_audits(predictions: list[Prediction]) -> None:
@@ -44,18 +47,29 @@ def schedule_night_audits(predictions: list[Prediction]) -> None:
     # define US market close time today
     market_close_time = ny_tz.localize(datetime.combine(now_ny.date(), time(16, 5)))
     eta_utc = market_close_time.astimezone(pytz.utc)
+    scheduling_disabled = False
 
     for pred in predictions:
-        # launch a Celery task for each prediction to run at market close
-        validate_single_prediction_task.apply_async(
-            args=[asdict(pred)],
-            eta=eta_utc,
-        )
-        logger.info(f"scheduled audit task for {pred.ticker} at {market_close_time} NY time")
+        if scheduling_disabled:
+            break
+
+        try:
+            # launch a Celery task for each prediction to run at market close
+            validate_single_prediction_task.apply_async(
+                args=[asdict(pred)],
+                eta=eta_utc,
+            )
+            logger.info(f"scheduled audit task for {pred.ticker} at {market_close_time} NY time")
+        except OperationalError as e:
+            logger.warning(f"Could not schedule audit task for {pred.ticker}: {e}")
+            scheduling_disabled = True
+        except Exception as e:
+            logger.warning(f"Could not schedule audit task for {pred.ticker}: {e}")
+            scheduling_disabled = True
 
 
 def run_day_analysis() -> None:
-    preliminary_conditions()
+    celery_available = preliminary_conditions()
     logger.info("starting day analysis pipeline")
 
     try:
@@ -87,8 +101,11 @@ def run_day_analysis() -> None:
         predictions = [Prediction.convert_snapshot_to_prediction(snapshot, used_model) for snapshot in market_data]
         db.bulk_insert_morning_predictions(predictions)
 
-        logger.info(f"step 6: scheduling night audits for {len(predictions)} predictions")
-        schedule_night_audits(predictions)
+        if celery_available:
+            logger.info(f"step 6: scheduling night audits")
+            schedule_night_audits(predictions)
+        else:
+            logger.warning(f"step 6 skipped: Celery is not available. Night audits will not be scheduled. Run the night_audit.py script manually after market close to validate predictions.")
 
     except DatabaseConnectionError as e:
         logger.error(f"DATABASE CONNECTION ERROR: {e}")

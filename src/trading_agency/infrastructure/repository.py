@@ -4,9 +4,9 @@ from typing import Iterable
 import psycopg2
 from psycopg2.extras import RealDictCursor, execute_batch
 
-from src.config import DB_CONFIG
-from src.domain.models import Prediction
-from src.utils.logger import get_logger
+from src.trading_agency.config import DB_CONFIG
+from src.trading_agency.domain.models import Prediction
+from src.trading_agency.utils.logger import get_logger
 
 logger = get_logger(__name__)
 

@@ -8,11 +8,11 @@ import yfinance as yf
 import pandas as pd
 from langchain_community.tools import DuckDuckGoSearchRun
 
-from entrypoints.celery_app import celery_app
-from src.domain.models import MarketSnapshot, MarketPerformance
-from src.domain.result import Result, ResultStatus
-from src.utils.exceptions import MarketDataError
-from src.utils.logger import get_logger
+from src.trading_agency.celery_app import celery_app
+from src.trading_agency.domain.models import MarketSnapshot, MarketPerformance
+from src.trading_agency.domain.result import Result, ResultStatus
+from src.trading_agency.utils.exceptions import MarketDataError
+from src.trading_agency.utils.logger import get_logger
 
 logger = get_logger("market_tools", debug_level=10)
 

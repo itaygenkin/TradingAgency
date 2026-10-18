@@ -5,34 +5,23 @@ An automated end-to-end pipeline that performs pre-market stock analysis using L
 
 ## Project Structure
 ```text
-├── data/                   # Generated Markdown reports & logs
+├── src/
+│   └── trading_agency/
+│       ├── application/       # Pipelines, audit services, and Celery tasks
+│       ├── domain/            # Models and result types
+│       ├── infrastructure/   # Market, LLM, and database integrations
+│       ├── utils/
+│       ├── celery_app.py
+│       └── config.py
+├── tests/
+│   ├── integration/
+│   └── unit/
+├── data/                     # Generated reports and runtime data
+├── logs/                     # Runtime logs
 ├── docker-compose.yaml
 ├── Dockerfile
 ├── requirements.txt
-├── .env
-├── entrypoints/
-│   ├── day_analysis.py        # Entry point: Trigger morning_pipeline
-│   ├── night_audit.py         # Entry point: Trigger evening_pipeline
-│   └── celery_app.py          # Celery worker/beat instantiation
-├── src/
-│   ├── application/
-│   │   ├── morning_pipeline.py     # Day analysis logic (orchestration)
-│   │   └── evening_pipeline.py     # Night audit logic (orchestration)
-│   ├── domain/             # Data Blueprints
-│   │   │   models.py
-│   │   └── result.py               # Result Data Class
-│   ├── infrastructure/     # Framework & Shared Components
-│   │   │   database_adapter.py     # PostgreSQL Adapter
-│   │   │   market_provider.py      # yfinance & DuckDuckGo fetching
-│   │   └── llm_engine.py           # LLM report generation & parsing
-│   ├── utils/              # Shared Helpers
-│   │   ├── exceptions.py     
-│   │   ├── utils.py 
-│   │   └── logger.py         
-│   └── config.py           # Environment & Watchlist settings
-└── tests/
-    ├── integration/
-    └── unit/
+└── .env.example
 ```
 ---
 
@@ -52,9 +41,9 @@ An automated end-to-end pipeline that performs pre-market stock analysis using L
 2. Create a `.env` file from `.env.example` and fill the required API keys and database credentials.
 3. Install all dependencies: `pip install -r requirements.txt`.
 4. Build and start the entire system (Database, Redis, Celery): `docker-compose up -d --build`.
-5. Launch the Streamlit dashboard: `streamlit run src/application/dashboard.py`. // not implemented yet
 
 ### Running the Pipelines
 1. Ensure the system is running: `docker-compose up -d` (or `docker-compose start`).
-2. Run the morning pipeline: `python -m entrypoints.day_analysis`.
-3. To stop the pipelines: `docker-compose down`.
+2. Run the morning pipeline from the repository root: `python -m src.trading_agency.application.day_analysis`.
+3. Run the evening audit manually if needed: `python -m src.trading_agency.application.night_audit`.
+4. To stop the pipelines: `docker-compose down`.

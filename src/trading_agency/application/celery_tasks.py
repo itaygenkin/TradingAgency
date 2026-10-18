@@ -1,10 +1,10 @@
-from entrypoints.celery_app import celery_app
-from entrypoints.celery_app import CELERY_COUNTDOWN
-from src.application.audit_service import PerformanceValidator
-from src.domain.models import Prediction
-from src.infrastructure.market_provider import MarketProvider
-from src.infrastructure.repository import MarketRepository
-from src.utils.logger import get_logger
+from src.trading_agency.celery_app import celery_app
+from src.trading_agency.celery_app import CELERY_COUNTDOWN
+from src.trading_agency.application.audit_service import PerformanceValidator
+from src.trading_agency.domain.models import Prediction
+from src.trading_agency.infrastructure.market_provider import MarketProvider
+from src.trading_agency.infrastructure.repository import MarketRepository
+from src.trading_agency.utils.logger import get_logger
 
 logger = get_logger("CeleryTasks")
 

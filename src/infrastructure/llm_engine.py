@@ -12,7 +12,7 @@ from src.utils.logger import get_logger
 logger = get_logger("market_agent")
 
 class MarketAnalystAgent:
-    def __init__(self, llm: Optional[BaseChatModel]):
+    def __init__(self, llm: Optional[BaseChatModel] = None):
         """
         initializes the AI Analyst with the Gemini model
         """

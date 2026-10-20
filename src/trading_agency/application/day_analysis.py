@@ -36,6 +36,7 @@ def preliminary_conditions() -> bool:
     try:
         return bool(celery_app.control.ping(timeout=1))
     except Exception:
+        logger.warning("Celery is not available")
         return False
 
 

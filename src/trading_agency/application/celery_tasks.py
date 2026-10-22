@@ -10,10 +10,10 @@ logger = get_logger("CeleryTasks")
 
 
 @celery_app.task(name="celery_tasks.validate_single_prediction", bind=True, max_retries=3)
-def validate_single_prediction_task(self, prediction: Prediction):
-    # TODO: Confirm whether Celery should receive a Prediction instance or a serialized dict payload.
-    ticker  = prediction.ticker
-    logger.info(f"[Celery] starting EOD validation task for {ticker}")
+def validate_single_prediction_task(self, pred: dict):
+    prediction: Prediction = Prediction(**pred)
+    ticker: str = prediction.ticker
+    logger.info(f"[Celery] starting EOD validation task for {ticker}.")
 
     try:
         market_results = MarketProvider.get_actual_market_performance_for_single_ticker(ticker)

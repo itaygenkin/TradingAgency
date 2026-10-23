@@ -20,14 +20,15 @@ def get_analysis_model() -> BaseChatModel:
         google_api_key=os.getenv("GOOGLE_API_KEY")
     )
 
-    fallback_model = ChatGoogleGenerativeAI(
-        model=models[1],
-        temperature=TEMPERATURE,
-        google_api_key=os.getenv("GOOGLE_API_KEY")
-    )
-
-    # hierarchical fallback
-    fallbacks: list[BaseLanguageModel] = [fallback_model]
+    # Every model after the first is tried in order if the preceding model fails.
+    fallbacks: list[BaseLanguageModel] = [
+        ChatGoogleGenerativeAI(
+            model=model,
+            temperature=TEMPERATURE,
+            google_api_key=os.getenv("GOOGLE_API_KEY")
+        )
+        for model in models[1:]
+    ]
 
     llm_with_fallback = primary_model.with_fallbacks(fallbacks=fallbacks)
 

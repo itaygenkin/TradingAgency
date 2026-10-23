@@ -12,7 +12,7 @@ def ensure_directories() -> None:
         os.makedirs(REPORTS_DIR)
 
 def save_report_to_file(report_name: str, report_content: str) -> str:
-    timestamp: str = datetime.now().strftime("%d-%m-%Y_%H-%M")
+    timestamp: str = datetime.now().strftime("%Y-%m-%d_%H-%M")
     filename: str = f"{report_name}_{timestamp}.{REPORT_FILE_EXTENSION}"
     file_path: str = os.path.join(REPORTS_DIR, filename)
 

@@ -109,13 +109,13 @@ def run_day_analysis() -> None:
             logger.warning(f"step 6 skipped: Celery is not available. Night audits will not be scheduled. Run the night_audit.py script manually after market close to validate predictions.")
 
     except DatabaseConnectionError as e:
-        logger.error(f"DATABASE CONNECTION ERROR: {e}")
+        logger.exception(f"DATABASE CONNECTION ERROR: {e}")
         sys.exit(1)
     except MarketDataError as e:
-        logger.error(f"DATA ERROR: {e}")
+        logger.exception(f"DATA ERROR: {e}")
         sys.exit(1)
     except Exception as e:
-        logger.error(f"UNEXPECTED EXCEPTION: {e}")
+        logger.exception(f"UNEXPECTED EXCEPTION: {e}")
         sys.exit(1)
     else:
         logger.info("day analysis completed")

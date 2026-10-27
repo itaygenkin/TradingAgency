@@ -41,5 +41,5 @@ def validate_single_prediction_task(self, pred: dict):
             logger.error(f"[Celery] failed to validate and update prediction for {ticker}: {evaluation.msg}")
 
     except Exception as e:
-        logger.error(f"[Celery] Error in task for {ticker}: {e}")
+        logger.exception(f"[Celery] Error in task for {ticker}: {e}")
         raise self.retry(exc=e, countdown=CELERY_COUNTDOWN)

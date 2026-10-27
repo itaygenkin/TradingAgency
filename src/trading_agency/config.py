@@ -37,7 +37,7 @@ if not os.path.exists(LOGS_DIR):
 
 # --- Database Settings ---
 DB_CONFIG = {
-    "host": os.getenv("DB_HOST", "localhost"),
+    "host": os.getenv("DB_HOST", ""),
     "port": os.getenv("DB_PORT", "5432"),
     "database": os.getenv("POSTGRES_DB", ""),
     "user": os.getenv("POSTGRES_USER", ""),

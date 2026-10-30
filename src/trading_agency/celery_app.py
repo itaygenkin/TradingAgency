@@ -8,7 +8,7 @@ from celery import Celery
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 load_dotenv(PROJECT_ROOT / ".env")
 
-CELERY_COUNTDOWN = 600  # time in seconds
+CELERY_COUNTDOWN = 300  # time in seconds
 
 
 def _is_docker_environment() -> bool:

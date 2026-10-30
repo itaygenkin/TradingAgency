@@ -17,8 +17,10 @@ services:
 
   worker:
     build: .
-    command: celery -A src.trading_agency.celery_app:celery_app worker --loglevel=info --concurrency=3
+    command: celery -A src.trading_agency.celery_app:celery_app worker --loglevel=info --concurrency=1
     env_file: .env
+    volumes:
+      - ./data/reports:/app/data/reports
     depends_on:
       - db
       - redis

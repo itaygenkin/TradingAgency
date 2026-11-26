@@ -47,3 +47,12 @@ An automated end-to-end pipeline that performs pre-market stock analysis using L
 2. Run the morning pipeline from the repository root: `python -m src.trading_agency.application.day_analysis`.
 3. Run the evening audit manually if needed: `python -m src.trading_agency.application.night_audit`.
 4. To stop the pipelines: `docker-compose down`.
+
+### Database migrations
+After deploying a schema change to an existing database, run its versioned migration from the repository root while the Compose services are running. To remove the obsolete `ai_report_path` column, run it in the worker container so the `DB_HOST=db` setting resolves on the Compose network:
+
+```powershell
+docker compose exec worker python -m scripts.migrate_drop_ai_report_path
+```
+
+The command uses the database settings from `.env` and is safe to rerun. Back up the database first if the stored report paths may still be needed; dropping the column permanently removes those values.

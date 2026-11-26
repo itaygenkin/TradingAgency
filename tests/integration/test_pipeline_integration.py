@@ -25,7 +25,6 @@ def sample_prediction(db):
         prev_close_price=180.5, # Changed from yesterday_close_price
         pre_market_price=182.3,
         predicted_move="Bullish",
-        ai_report_path="test_report_path", # Changed from report_path
         llm_model="gemini"
     )
 

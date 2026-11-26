@@ -44,7 +44,6 @@ class MarketRepository:
                 actual_move_pct     DECIMAL(10, 2),
                 is_correct          BOOLEAN,
                 confidence_score    INTEGER,
-                ai_report_path      TEXT,
                 status              VARCHAR(20) NOT NULL DEFAULT 'PENDING',
                 created_at          TIMESTAMP(0) NOT NULL DEFAULT date_trunc('minute', CURRENT_TIMESTAMP),
                 updated_at          TIMESTAMP(0) NOT NULL DEFAULT date_trunc('minute', CURRENT_TIMESTAMP),
@@ -62,8 +61,8 @@ class MarketRepository:
     def _bulk_insert_morning_predictions(self, prediction_list: list) -> None:
         query = f"""
             INSERT INTO {self._table_name} (
-            ticker, prev_close_price, pre_market_price, predicted_move, ai_report_path, status, llm_model)
-            VALUES (%s, %s, %s, %s, %s, %s, %s);
+            ticker, prev_close_price, pre_market_price, predicted_move, status, llm_model)
+            VALUES (%s, %s, %s, %s, %s, %s);
         """
         try:
             with self._get_connection() as conn:

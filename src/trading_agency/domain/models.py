@@ -22,7 +22,6 @@ class Prediction:
     prev_close_price: float
     pre_market_price: float
     predicted_move: str
-    ai_report_path: Optional[str] = None
     status: str = "PENDING"
     llm_model: Optional[str] = None
 
@@ -33,7 +32,6 @@ class Prediction:
             prev_close_price=market_snapshot.yesterday_close_price,
             pre_market_price=market_snapshot.pre_market_price,
             predicted_move=market_snapshot.prediction or "Neutral",
-            ai_report_path=market_snapshot.report_path,
             llm_model=llm_model,
             status="PENDING"
         )

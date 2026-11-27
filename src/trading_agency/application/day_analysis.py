@@ -86,10 +86,11 @@ def run_day_analysis() -> None:
         news_data: dict[str, Any] = MarketProvider.get_stock_news_for_watchlist(WATCHLIST)
 
         logger.info("step 2: sending data to agent for analysis and creating report")
-        report, used_model = agent.analyze_market_data(market_data, news_data)
+        analysis = agent.analyze_market_data(market_data, news_data)
+        report = analysis.report
 
-        logger.info("step 3: extracting predictions from report")
-        predictions_dict = agent.extract_predictions(report)
+        logger.info("step 3: using structured predictions from analysis")
+        predictions_dict = analysis.predictions
 
         logger.info("step 4: clean and save report to file")
         report = clean_report(report)
@@ -99,7 +100,7 @@ def run_day_analysis() -> None:
         update_market_data_prediction_and_report_path(market_data, predictions_dict, report_path)
 
         logger.info("step 5: inserting report into database")
-        predictions = [Prediction.convert_snapshot_to_prediction(snapshot, used_model) for snapshot in market_data]
+        predictions = [Prediction.convert_snapshot_to_prediction(snapshot, analysis.model_used) for snapshot in market_data]
         db.bulk_insert_morning_predictions(predictions)
 
         if celery_available:

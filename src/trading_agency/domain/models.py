@@ -1,6 +1,8 @@
 from __future__ import annotations
 from dataclasses import dataclass
-from typing import Optional
+from typing import Literal, Optional
+
+from pydantic import BaseModel, Field
 
 
 @dataclass
@@ -13,6 +15,20 @@ class MarketSnapshot:
     pre_market_gap_pct: float
     prediction: Optional[str] = None  # will be filled after AI analysis
     report_path: Optional[str] = None
+
+
+class MarketAnalysisContent(BaseModel):
+    """Fields requested directly from the LLM using structured output."""
+    report: str = Field(description="Complete daily market analysis report in Markdown format.")
+
+    predictions: dict[str, Literal["Bullish", "Bearish", "Neutral"]] = Field(
+        description="One prediction per analyzed ticker, using exactly Bullish, Bearish, or Neutral."
+    )
+
+
+class MarketAnalysisResponse(MarketAnalysisContent):
+    """Validated structured result with the model that produced it."""
+    model_used: str
 
 
 @dataclass

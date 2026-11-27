@@ -2,10 +2,11 @@ import re
 from typing import Optional
 
 from langchain_core.language_models import BaseChatModel
+from pydantic import ValidationError
 
 from src.trading_agency.config import AGENT_ROLE
 from src.trading_agency.infrastructure.llm_factory import get_analysis_model
-from src.trading_agency.domain.models import MarketSnapshot
+from src.trading_agency.domain.models import MarketAnalysisContent, MarketAnalysisResponse, MarketSnapshot
 from src.trading_agency.utils.exceptions import MarketDataError
 from src.trading_agency.utils.logger import get_logger
 
@@ -13,17 +14,15 @@ logger = get_logger("market_agent")
 
 class MarketAnalystAgent:
     def __init__(self, llm: Optional[BaseChatModel] = None):
-        """
-        initializes the AI Analyst with the Gemini model
-        """
-        self.llm = llm or get_analysis_model()
+        """initializes the AI Analyst with the Gemini model"""
+        self.structured_llm = get_analysis_model(MarketAnalysisContent)
 
-    def analyze_market_data(self, market_data: list[MarketSnapshot], news_data: dict[str, str]) -> tuple[str, str]:
+    def analyze_market_data(self, market_data: list[MarketSnapshot], news_data: dict[str, str]) -> MarketAnalysisResponse:
         """
         Synthesizes price data and news into a professional trading report.
         :param market_data: the dictionary returned by get_premarket_data.
         :param news_data: the dictionary returned by get_news_data.
-        :return: a string containing the AI's analysis and recommendation.
+        :return: the report, extracted predictions, and model used for the analysis.
         """
         logger.info("Starting AI synthesis of market data and news.")
         prompt: str = (
@@ -38,30 +37,36 @@ class MarketAnalystAgent:
             f"  - ## Deep Dive per Ticker (Header 3 for each stock, explaining the 'Why' behind the move based on news)\n"
             f"  - ## Trading Strategy (Key levels or warnings for the open)\n\n"
             f"2. Be specific, professional, and concise. Avoid generic statements.\n\n"
-            f"3. CRITICAL TECHNICAL REQUIREMENTS:\n"
-            f"At the very end of you response, after the entire report, you must add a technical data block for system parsing."
-            f"This block must be titled 'DATA_SUMMARY' and follow this exact format:\n"
-            f"DATA_START\n"
-            f"TICKER:MOVE\n"
-            f"DATA_END\n"
-            f"replace 'MOVE' with exactly one of the following labels: Bullish, Bearish or Neutral."
-            f"Ensure the sentiment in the table matches the move in this data block.\n\n"
-            f"EXAMPLE:\n"
-            f"DATA_START\n"
-            f"AAPL:Bullish\n"
-            f"TSLA:Bearish\n"
-            f"NVDA:Neutral\n"
-            f"DATA_END\n"
+            f"3. Return the report and predictions in the requested structured output.\n"
+            f"4. The predictions object must have one key per analyzed ticker, and each value must be exactly "
+            f"Bullish, Bearish, or Neutral. Ensure its values match the sentiment in the report.\n"
         )
 
-        response = self.llm.invoke(prompt)
+        response = self.structured_llm.invoke(prompt)
         try:
-            content = response.content[0].get("text")
-            used_model = response.response_metadata.get("model_name", "Unknown")
-        except (KeyError, IndexError, TypeError):
-            raise MarketDataError("couldn't parse or invoke market data analysis from LLM response")
+            parsed = response["parsed"]
+            raw_response = response["raw"]
+            parsing_error = response["parsing_error"]
+            if parsing_error is not None or parsed is None:
+                raise MarketDataError(f"couldn't parse structured market analysis from LLM response: {parsing_error}")
 
-        return content, used_model
+            content = MarketAnalysisContent.model_validate(parsed)
+            if not content.report.strip():
+                raise MarketDataError("LLM returned an empty market analysis report")
+
+            expected_tickers = {snapshot.ticker for snapshot in market_data}
+            actual_tickers = set(content.predictions)
+            if actual_tickers != expected_tickers:
+                raise MarketDataError(
+                    f"structured predictions do not match the analyzed tickers "
+                    f"(missing={expected_tickers - actual_tickers}, extra={actual_tickers - expected_tickers})"
+                )
+
+            response_metadata = getattr(raw_response, "response_metadata", {}) or {}
+            used_model = response_metadata.get("model_name", "Unknown")
+            return MarketAnalysisResponse(**content.model_dump(), model_used=used_model)
+        except (KeyError, AttributeError, TypeError, ValidationError) as e:
+            raise MarketDataError("couldn't parse structured market analysis from LLM response") from e
 
     @staticmethod
     def extract_predictions(full_report: str) -> dict[str, str]:

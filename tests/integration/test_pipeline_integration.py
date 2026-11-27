@@ -7,7 +7,6 @@ from celery.exceptions import Retry
 from src.trading_agency.infrastructure.llm_factory import get_analysis_model
 from src.trading_agency.infrastructure.repository import MarketRepository
 from src.trading_agency.application.audit_service import PerformanceValidator
-from src.trading_agency.infrastructure.llm_engine import MarketAnalystAgent
 from src.trading_agency.domain.models import MarketPerformance, Prediction
 from src.trading_agency.application.celery_tasks import validate_single_prediction_task
 
@@ -39,10 +38,9 @@ class TestTradingPipelineIntegration:
     def test_llm_factory_fallback_integration(self):
         """verify that the LLM Fallback pipeline initializes correctly and returns a valid response metadata object"""
         llm = get_analysis_model()
-        agent = MarketAnalystAgent(llm=llm)
 
         prompt = "Provide a short 1-line market outlook for Apple (AAPL)"
-        response = agent.llm.invoke(prompt)
+        response = llm.invoke(prompt)
 
         assert response is not None
         assert len(response.content) > 0

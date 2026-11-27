@@ -57,7 +57,7 @@ class MarketAnalystAgent:
         response = self.llm.invoke(prompt)
         try:
             content = response.content[0].get("text")
-            used_model = response.response_metadata.get("model", "Unknown")
+            used_model = response.response_metadata.get("model_name", "Unknown")
         except (KeyError, IndexError, TypeError):
             raise MarketDataError("couldn't parse or invoke market data analysis from LLM response")
 
